@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body,
+html {
+    overflow-x: hidden;
+}
+@layer base {
+    body {
+        font-family: "Inter", sans-serif;
+    }
+}
+
+/* Chrome, Safari and Opera */
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+.transform_z {
+    @apply transform transition-transform duration-300 hover:scale-105;
+}
+
+
+.scrollbar-hidden {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #ef4444;
+    border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #092652;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.scrolling-wrapper {
+    display: flex;
+    animation: scroll 20s linear infinite;
+}
+
+.my-masonry-grid {
+    display: flex;
+    margin-left: -15px; /* Kích thước gutter offset */
+    width: auto;
+}
+.my-masonry-grid_column {
+    padding-left: 15px; /* Kích thước gutter */
+    background-clip: padding-box;
+}
+
+/* Kiểu dáng cho các phần tử trong cột */
+.my-masonry-grid_column > div {
+    margin-bottom: 15px;
+}
