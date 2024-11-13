@@ -113,9 +113,9 @@ export default function ListCustomer() {
                             return (
                              
                                     <div
-                                        // onClick={() =>
-                                        //     handleOpenForm(item.user_id)
-                                        // }
+                                        onClick={() =>
+                                            handleOpenForm(item.user_id)
+                                        }
                                         key={item.user_id}
                                         className={`" grid grid-cols-7 grid-rows-1 w-full h-full rounded-[5px] hover:bg-blue-100 ${
                                             index !== 4 ? `border-b-[1px]` : ""

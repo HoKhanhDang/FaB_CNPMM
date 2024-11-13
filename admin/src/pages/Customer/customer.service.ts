@@ -21,3 +21,11 @@ export const changeStatusCustomerAPI = async (data: any) => {
         data,
     });
 };
+export const getOrderByCustomerIdAPI = async (data: any) => {
+    return await axios.get(`http://localhost:5000/api/order/user/${data}`)
+    // return await axios({
+    //     method: "GET",
+    //     url: `/user/${data}`,
+    //     params: data,
+    // });
+};
