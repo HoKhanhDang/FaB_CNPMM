@@ -1,4 +1,6 @@
 import axios from "../../axios";
+import sendNotification from "../../socket/sendNotification";
+
 export const getAllNotificationsAPI = async () => {
     return await axios({
         method: "GET",
@@ -7,6 +9,7 @@ export const getAllNotificationsAPI = async () => {
 };
 
 export const sendNotificationAPI = async (data: any) => {
+    sendNotification()
     return await axios({
         method: "POST",
         url: "/notification",

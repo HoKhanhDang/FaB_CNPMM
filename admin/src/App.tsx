@@ -9,6 +9,9 @@ import { sendNotificationAction } from "./redux/api/notification";
 import Swal from "sweetalert2";
 import Layout from "./components/Layout";
 import Loading from "./components/loading/LoadingPage";
+import { loginAPI } from "./pages/Auth/auth.service";
+import { login } from "./redux/slice/user.slice";
+import Test from "./pages/Test/Test";
 
 const DashBoard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Login = lazy(() => import("./pages/Auth/Login"));
@@ -63,7 +66,6 @@ function App() {
     useEffect(() => {
         socket.connect();
         socket.on("orderCancelNotification", (orderId: string) => {
-
             dispatch(
                 sendNotificationAction({
                     title: "Order has been cancelled" as string,
@@ -98,40 +100,51 @@ function App() {
         };
     }, []);
 
+    useEffect(() => {
+        sessionStorage.setItem("demo", "true");
+    }, []);
+
     return (
         <div className="App">
-            <Suspense fallback={<Loading/>}>
+            <Suspense fallback={<Loading />}>
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-
+                    <Route path="/test" element={<Test />} />
                     {isLogin && (
-                        <Route path="/" element={<Layout />}>
-                            <Route index element={<DashBoard />} />
+                        <>
+                            <Route path="/" element={<Layout />}>
+                                <Route index element={<DashBoard />} />
+                                <Route path="/profile" element={<Profile />} />
+                                <Route path="/staff" element={<Staff />} />
+                                <Route
+                                    path="/customer"
+                                    element={<Customer />}
+                                />
+                                <Route path="/menu" element={<Menu />} />
+                                <Route
+                                    path="/ingredient"
+                                    element={<Ingredient />}
+                                />
+                                <Route
+                                    path="/history_order"
+                                    element={<HistoryOrder />}
+                                />
+                                <Route path="/order" element={<Order />} />
+                                <Route path="/kitchen" element={<Kitchen />} />
+                                <Route
+                                    path="/notification"
+                                    element={<Notification />}
+                                />
+                                <Route
+                                    path="/schedule"
+                                    element={<Schedule />}
+                                />
+
+                                <Route path="/grid" element={<Grid />} />
+                            </Route>
                             <Route path="/shipper" element={<Shipper />} />
-
-                            <Route path="/profile" element={<Profile />} />
-                            <Route path="/staff" element={<Staff />} />
-                            <Route path="/customer" element={<Customer />} />
-                            <Route path="/menu" element={<Menu />} />
-                            <Route
-                                path="/ingredient"
-                                element={<Ingredient />}
-                            />
-                            <Route
-                                path="/history_order"
-                                element={<HistoryOrder />}
-                            />
-                            <Route path="/order" element={<Order />} />
-                            <Route path="/kitchen" element={<Kitchen />} />
-                            <Route
-                                path="/notification"
-                                element={<Notification />}
-                            />
-                            <Route path="/schedule" element={<Schedule />} />
-
-                            <Route path="/grid" element={<Grid />} />
-                        </Route>
+                        </>
                     )}
                 </Routes>
             </Suspense>

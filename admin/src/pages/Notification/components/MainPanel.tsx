@@ -1,14 +1,17 @@
 import { useDispatch, useSelector } from "react-redux";
 import ListNotification from "./ListNotifications";
-import { useState } from "react";
-import INotification from "../../../types/notification.interface";
+import { useEffect, useState } from "react";
 import FilterNotification from "./FilterNotification";
+import SocketSingleton from "../../../socket";
+import { fetchNotifications } from "../../../redux/api/notification";
 interface MainPanelProps {}
 
 const MainPanel: React.FC<MainPanelProps> = ({}) => {
+    const dispatch = useDispatch();
     const { notifications } = useSelector(
         (state: any) => state.notificationSlice
     );
+    const socket = SocketSingleton.getInstance();
 
     const [filter, setFilter] = useState("");
 
@@ -28,6 +31,16 @@ const MainPanel: React.FC<MainPanelProps> = ({}) => {
             return 0;
         })
         .reverse();
+
+    useEffect(() => {
+        socket.on("get-notification", () => {
+            console.log("notification");
+            dispatch<any>(fetchNotifications());
+        });
+        return () => {
+            socket.off("notification");
+        };
+    }, []);
 
     return (
         <div className="w-full h-full rounded-[20px] bg-white flex flex-col gap-5 p-5">

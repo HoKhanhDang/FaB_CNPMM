@@ -3,16 +3,20 @@ import DetailShipping from "./DetailShipping";
 import Swal from "sweetalert2";
 import { changeStatusOrderAPI } from "../../Order/order.service";
 import SocketSingleton from "../../../socket";
+import { sendNotificationToUser } from "../../../utils/Notification/notification.utils";
+import sendNotification from "../../../socket/sendNotification";
 
 interface OrderCardProps {
     order_id: string;
     time: string;
+    user_id: string;
     fetchOrders: () => void;
 }
 const OrderCard: React.FC<OrderCardProps> = ({
     order_id,
     time,
     fetchOrders,
+    user_id,
 }) => {
     const socket = SocketSingleton.getInstance();
     const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -32,7 +36,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     status: stage,
                     order_id,
                 });
-         
+
                 if (rs?.status === 200) {
                     Swal.fire(
                         "Completed!",
@@ -40,6 +44,17 @@ const OrderCard: React.FC<OrderCardProps> = ({
                         "success"
                     );
                     fetchOrders();
+
+                    //send notification
+                    await sendNotificationToUser({
+                        title: "Order delivered",
+                        content: `Order #${order_id} has been delivered`,
+                        type: "done",
+                        link: "/order",
+                        user_id: user_id,
+                    });
+                    sendNotification()
+
                     setIsOpenDetail(false);
                     socket.emit("orderDelivered", order_id);
                     check = true;

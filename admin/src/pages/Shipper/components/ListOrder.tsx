@@ -46,10 +46,11 @@ const ListOrders: React.FC<ListOrdersProps> = ({
                 }
                 {list?.map((order:{
                     order_id: string,
-                    delivery_time: string
+                    delivery_time: string,
+                    user_id: string
                 }, index) => {
                     return (
-                        <OrderCard fetchOrders={fetchOrders} order_id={order.order_id} time={order.delivery_time}/>
+                        <OrderCard fetchOrders={fetchOrders} user_id={order.user_id} order_id={order.order_id} time={order.delivery_time}/>
                     )
                 })}
             </div>

@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 
 export interface IUser extends Document {
     user_id: Schema.Types.ObjectId;
-    username: string;
     password: string;
     email: string;
     fullName: string;
@@ -25,11 +24,6 @@ const UserSchema: Schema = new Schema<IUser>({
         required: true,
         unique: true,
         // To implement auto-increment, consider using a plugin like mongoose-sequence
-    },
-    username: {
-        type: String,
-        required: true,
-        trim: true,
     },
     password: {
         type: String,

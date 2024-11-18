@@ -23,12 +23,13 @@ const AddMenuService = async (menu: {
 
 // Cập nhật món ăn trong menu
 const UpdateMenuService = async (menu: {
-    title: string;
-    price: number;
-    description: string;
-    image: string;
-    category: string;
+    title?: string;
+    price?: number;
+    description?: string;
+    image?: string;
+    category?: string;
     item_id: string;
+    availability?: boolean;
 }) => {
     const { item_id, ...updateData } = menu;
     try {

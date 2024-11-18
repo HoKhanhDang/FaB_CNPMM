@@ -2,15 +2,21 @@ import React from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaBell } from "react-icons/fa6";
+
 //logo
-import logo from "../../assets/image/logo.png";
+import logo from "../../assets/images/logo.png";
 
 import Badge from "@mui/material/Badge";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slice/user.slice";
+import Notification from "../notification/Notifications";
+import { INotification } from "../../types/INotification";
 interface NavigationProps {
     setIsOpenNavMenu: (value: boolean) => void;
+    notification: INotification[];
+    fetchNotifications?: () => void;
 }
 
 const links = [
@@ -33,12 +39,16 @@ const links = [
     },
 ];
 
-const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
+const Navigation: React.FC<NavigationProps> = ({
+    setIsOpenNavMenu,
+    notification,
+    fetchNotifications,
+}) => {
     const dispatch = useDispatch();
     const { items } = useSelector((state: any) => state.cartSlice);
-    const { isLogin, image } = useSelector(
-        (state: any) => state.customerSlice
-    );
+    const { isLogin, image } = useSelector((state: any) => state.customerSlice);
+    const [isShowNotification, setIsShowNotification] = React.useState(false);
+
     const navigate = useNavigate();
     const handleLogout = () => {
         window.localStorage.removeItem("persist:cart");
@@ -49,8 +59,8 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
     return (
         <>
             <nav className="mt-[30px] flex flex-col justify-center items-center self-stretch px-16 py-6 w-full h-[100px] text-xl font-bold bg-orange-50 shadow-sm text-slate-700 max-md:px-5 max-md:max-w-full">
-                <div className="flex flex-row gap-10 justify-evenly items-center md:justify-between w-full rounded-none max-w-[1198px] max-md:max-w-full">
-                    <div className="sm:!hidden flex justify-center items-start ">
+                <div className="flex flex-row gap-10 max-sm:justify-between sm:justify-evenly items-center md:justify-between w-full rounded-none max-w-[1198px] max-md:max-w-full">
+                    <div className="sm:!hidden flex justify-center items-start w-[80px]">
                         <RxHamburgerMenu
                             onClick={() => setIsOpenNavMenu(true)}
                             className="text-[30px] cursor-pointer transform transition-transform duration-300 hover:scale-125"
@@ -59,7 +69,7 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
                     <img
                         loading="lazy"
                         src={logo}
-                        className="object-contain shrink-0 max-w-full aspect-[1.49] h-[70px] w-[70px] cursor-pointer"
+                        className="object-contain shrink-0 max-w-full aspect-[1.49] h-[70px] w-[70px] cursor-pointer "
                         alt="Company Logo"
                         onClick={() => navigate("/")}
                     />
@@ -76,17 +86,7 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
                                 </div>
                             ))}
                         </div>
-                        <Badge
-                            badgeContent={items?.length || 0}
-                            color="primary"
-                            className="flex justify-center items-start"
-                        >
-                            <FaCartShopping
-                                className="text-[30px] transform transition-transform duration-300 hover:scale-125"
-                                color="action"
-                                onClick={() => navigate("/cart")}
-                            />
-                        </Badge>
+
                         <div className="max-md:hidden md:flex gap-2.5 self-stretch my-auto text-[18px]">
                             <div className="flex flex-col justify-start">
                                 <div className="grow self-start">
@@ -103,9 +103,51 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
                                 alt=""
                             />
                         </div>
+                        <div className="flex flex-row justify-evenly items-center gap-5 relative">
+                            <Badge
+                                badgeContent={
+                                    notification.filter((item) => {
+                                        return !item.isRead;
+                                    })?.length || 0
+                                }
+                                color="primary"
+                                className="flex justify-center items-start"
+                            >
+                                <FaBell
+                                    className=" cursor-pointer text-[30px] transform transition-transform duration-300 hover:scale-125 hover:text-red-500"
+                                    color="action"
+                                    onClick={() =>
+                                        setIsShowNotification(
+                                            !isShowNotification
+                                        )
+                                    }
+                                />
+                            </Badge>
+                            {isLogin && isShowNotification && (
+                                <Notification
+                                    fetchNotifications={fetchNotifications}
+                                    setIsShowNotification={
+                                        setIsShowNotification
+                                    }
+                                    listNotification={notification}
+                                />
+                            )}
+                            <Badge
+                                badgeContent={items?.length || 0}
+                                color="primary"
+                                className="flex justify-center items-start"
+                            >
+                                <FaCartShopping
+                                    className=" cursor-pointer text-[30px] transform transition-transform duration-300 hover:scale-125 hover:text-red-500"
+                                    color="action"
+                                    onClick={() => navigate("/cart")}
+                                />
+                            </Badge>
+                        </div>
+
                         {!isLogin && (
                             <div
-                                onClick={() => navigate("/auth")}
+                                onClick={() => navigate("/auth/login")}
                                 className=" sm:flex hidden cursor-pointer self-stretch px-5 py-2 my-auto text-lg text-orange-50 whitespace-nowrap bg-red-600 rounded-xl shadow-sm   transform transition-transform duration-300 hover:scale-110"
                             >
                                 LOGIN
@@ -116,10 +158,9 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
                                 <div className="flex flex-col justify-center items-center">
                                     <div
                                         onClick={() => {
-                                          
                                             navigate(`/profile`);
                                         }}
-                                        className="w-[40px] h-[40px]  flex justify-center items-center"
+                                        className="w-[40px] h-[40px]  flex justify-center items-center transform transition-transform duration-300 hover:scale-110"
                                     >
                                         <img
                                             src={image}
@@ -128,7 +169,7 @@ const Navigation: React.FC<NavigationProps> = ({ setIsOpenNavMenu }) => {
                                         />
                                     </div>
                                 </div>
-                                <div className="self-stretch px-5 py-2 my-auto text-lg text-red-500 whitespace-nowrap rounded-xl shadow-sm">
+                                <div className="self-stretch px-5 py-2 my-auto text-lg text-red-500 rounded-xl transform transition-transform duration-300 hover:scale-110 hover:text-red-300">
                                     <IoLogOutOutline
                                         onClick={handleLogout}
                                         className="text-[30px]"

@@ -24,7 +24,7 @@ const IngredientSchema: Schema = new Schema<IIngredient>(
     },
     stock: {
       type: Number,
-      default: null,
+      default: 0,
     },
     unit: {
       type: String,

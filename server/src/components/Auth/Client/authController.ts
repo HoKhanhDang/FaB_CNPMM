@@ -13,10 +13,17 @@ const loginController = async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await AuthClientService.login(email as string, password as string);
+        const result = await AuthClientService.login(
+            email as string,
+            password as string
+        );
         return res.status(200).json(result);
     } catch (error: any) {
-        return res.status(error.status || 500).json({ message: error.message });
+        console.log(error);
+        res.status(error.status || 500).json({
+            status: error.status || 500,
+            message: error.message || "Server error",
+        });
     }
 };
 
@@ -75,10 +82,15 @@ const registerController = async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await AuthClientService.register(name as string, email as string, password as string, phone as string);
+        const result = await AuthClientService.register(
+            name as string,
+            email as string,
+            password as string,
+            phone as string
+        );
         return res.status(200).json({
             message: "Đăng ký thành công",
-            result
+            result,
         });
     } catch (error: any) {
         if (error.status === 409) {

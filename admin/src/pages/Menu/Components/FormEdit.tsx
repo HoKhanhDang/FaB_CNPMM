@@ -53,11 +53,14 @@ const FormEdit: React.FC<IFormEditProps> = ({ setIsEdit, m_id }) => {
         };
     }
     useEffect(() => {
+        let isMounted = true;
         getFoodDetails().then((data) => {
-            setFoodDetail(data);
+            if (isMounted) setFoodDetail(data);
         });
-    }, []);
-
+        return () => {
+            isMounted = false;
+        };
+    }, [m_id]);
     //validation
     const [error, setError] = useState({
         title: "",
@@ -115,12 +118,15 @@ const FormEdit: React.FC<IFormEditProps> = ({ setIsEdit, m_id }) => {
 
         //add nutrition (optional)
         if (foodDetail?.nutrition !== null) {
-            await updateNutritionAPI({ ...foodDetail?.nutrition, item_id: m_id });
+            await updateNutritionAPI({
+                ...foodDetail?.nutrition,
+                item_id: m_id,
+            });
         }
 
         //add ingredients (optional)
         if (foodDetail?.ingredients.length !== 0) {
-            const rs = await deleteAllListItemIngredientAPI({ item_id: m_id });
+            await deleteAllListItemIngredientAPI({ item_id: m_id });
             foodDetail?.ingredients?.forEach(async (item) => {
                 await addListItemIngredientAPI({
                     item_id: m_id,

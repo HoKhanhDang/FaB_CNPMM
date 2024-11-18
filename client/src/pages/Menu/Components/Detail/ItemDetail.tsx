@@ -10,13 +10,13 @@ import NutritionShow from "./NutritionShow";
 import DropdownItemMenu from "./DropdownReview";
 import { FaCartShopping } from "react-icons/fa6";
 
-
 interface ItemDetailProps {
     title: string;
     detail: string;
     image: string;
     id: string;
     price: number;
+    availability: boolean;
 }
 const ItemDetail: React.FC<ItemDetailProps> = ({
     detail,
@@ -24,6 +24,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({
     price,
     id,
     title,
+    availability,
 }) => {
     const dispatch = useDispatch();
 
@@ -58,22 +59,28 @@ const ItemDetail: React.FC<ItemDetailProps> = ({
                     />
                 </div>
                 <div className="max-sm:w-full sm:w-1/2 flex flex-col justify-center items-center p-5 gap-5">
-                    <span className="text-[18px] font-normal p-5">{detail}</span>
+                    <span className="text-[18px] font-normal p-5">
+                        {detail}
+                    </span>
 
                     <NutritionShow data={data as INutrition} />
                     <div className="text-[40px] font-semibold ">
                         {FormatCurrency(price)}
                     </div>
-                    <div
+
+                    <button
                         onClick={handleAddToCart}
-                        className="bg-red-500 group gap-[30px] text-white transform_z cursor-pointer rounded-xl flex justify-center items-center h-[50px] w-1/2"
+                        disabled={!availability}
+                        className={` ${
+                            availability ? "bg-red-500" : "bg-red-500/50"
+                        } group gap-[30px] text-white transform_z cursor-pointer rounded-xl flex justify-center items-center h-[50px] w-1/2`}
                     >
-                        Add to cart  <FaCartShopping className="ml-2 text-[30px] group-hover:animate-wobble-hor-bottom "/>
-                    </div>
+                        {availability ? "Add to cart" : "Not available now"} 
+                        <FaCartShopping className="ml-2 text-[30px] group-hover:animate-wobble-hor-bottom " />
+                    </button>
                 </div>
-                
             </div>
-            <DropdownItemMenu item_id ={id}/>
+            <DropdownItemMenu item_id={id} />
         </>
     );
 };

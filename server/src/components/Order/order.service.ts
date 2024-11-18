@@ -3,6 +3,53 @@ import { convertDay } from "../../utils/Order";
 import { MenuItem } from "../Menu/menu.model";
 import { ObjectId } from "mongodb";
 import { now } from "mongoose";
+import { MenuItemIngredient } from "../MenuItemIngredient/menuitemIngredient.model";
+import { Ingredient } from "../Ingredient/ingredient.model";
+
+type OrderItems = {
+    item_id: string;
+    quantity: number;
+};
+
+const checkAndReduceStock = async (
+    menuitemId: string,
+    quantityOrdered: number
+) => {
+    // Lấy danh sách nguyên liệu cần thiết cho món
+    const ingredientsNeeded = await MenuItemIngredient.find({
+        item_id: menuitemId,
+    });
+
+    // Duyệt từng nguyên liệu cần cho món
+    for (const item of ingredientsNeeded) {
+        const ingredient = await Ingredient.findOne({
+            ingredient_id: item.ingredient_id,
+        });
+        const totalRequired = (item.quantity_required ?? 0) * quantityOrdered;
+        // Kiểm tra tồn kho
+        if (
+            !ingredient ||
+            (ingredient.stock ?? 0) < totalRequired ||
+            !ingredient.is_available
+        ) {
+            if (ingredient) {
+                ingredient.is_available = false;
+                ingredient.save();
+            }
+            return false; // Hết hàng
+        }
+    }
+
+    // Trừ tồn kho sau khi kiểm tra đủ
+    for (const item of ingredientsNeeded) {
+        const totalRequired = (item.quantity_required ?? 0) * quantityOrdered;
+        await Ingredient.updateOne(
+            { ingredient_id: item.ingredient_id },
+            { $inc: { stock: -totalRequired } }
+        );
+    }
+    return true;
+};
 
 const CreateOrderService = async (params: {
     user_id: string; // ID người dùng
@@ -12,8 +59,33 @@ const CreateOrderService = async (params: {
     address: string | null; // Địa chỉ giao hàng
     lng?: number | null; // Kinh độ
     lat?: number | null; // Vĩ độ
-}): Promise<IOrder> => {
-    const lastOrder = await Order.findOne().sort({ order_id: -1 });
+    list_items?: OrderItems[];
+}): Promise<{
+    message: string;
+    status: boolean;
+    code: number;
+    data?: IOrder | null;
+}> => {
+    if (params.list_items) {
+        for (const item of params.list_items) {
+            if (!(await checkAndReduceStock(item.item_id, item.quantity))) {
+                //logic to change status of item to unavailable
+                const menuItem = await MenuItem.findOne({
+                    item_id: item.item_id,
+                });
+                if (menuItem) {
+                    menuItem.availability = false;
+                    menuItem.save();
+                }
+
+                return {
+                    code: 409,
+                    message: "Out of stock",
+                    status: false,
+                };
+            }
+        }
+    }
     const data = new Order({
         order_id: new ObjectId(),
         user_id: params.user_id,
@@ -30,7 +102,13 @@ const CreateOrderService = async (params: {
     });
 
     const order = new Order(data);
-    return await order.save();
+    const dataSave = await order.save();
+    return {
+        message: "Create order successfully",
+        status: true,
+        code: 200,
+        data: dataSave,
+    };
 };
 
 const AddOrderItemService = async (params: {
@@ -142,8 +220,8 @@ const ChangeStatusService = async (params: {
     const { order_id, status, delivery_time, user_id } = params;
     const updateData: any = { status };
     if (delivery_time !== undefined) {
-        updateData.delivery_time = convertDay(delivery_time as string); ;
-    }else{
+        updateData.delivery_time = convertDay(delivery_time as string);
+    } else {
         updateData.delivery_time = now();
     }
 

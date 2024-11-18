@@ -3,25 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { AddOrderItem, CreateOrder } from "../../utils/checkout/checkout.service";
 
 const VnpayReturn: React.FC = () => {
     const location = useLocation();
     const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
     const [transactionInfo, setTransactionInfo] = useState<any>(null);
 
-    const OrderCreation = async (data: any) => {
+    const OrderCreation = async () => {
         try {
-            const rs = await CreateOrder(data.order);
-            if (rs?.status === 201) {
-                data?.items.map(async (item: any) => {
-                    await AddOrderItem({
-                        order_id: rs?.data.result.insertId,
-                        item_id: item.id,
-                        quantity: item.quantity,
-                    });
-                });
-            }
             window.localStorage.removeItem("order");
             window.localStorage.removeItem("persist:cart");
             Swal.fire({
@@ -57,10 +46,8 @@ const VnpayReturn: React.FC = () => {
 
         // Kiểm tra trạng thái thanh toán
         if (vnp_ResponseCode === "00") {
-            const orderData = window.localStorage.getItem("order");
-            const data = orderData ? JSON.parse(orderData) : null;
             setPaymentStatus("success");
-            OrderCreation(data);
+            OrderCreation();
         } else {
             setPaymentStatus("failed");
             setTimeout(() => {

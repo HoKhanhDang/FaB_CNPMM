@@ -87,6 +87,7 @@ const ListIngredients: React.FC<ListIngredientsProps> = ({ isRender }) => {
             limit: 10,
         };
         const rs = await getIngredientByParamsAPI(data);
+        console.log(rs);
         setList(rs?.data?.result);
     };
 
@@ -149,7 +150,7 @@ const ListIngredients: React.FC<ListIngredientsProps> = ({ isRender }) => {
                                 name: string;
                                 stock: string;
                                 unit: string;
-                                is_available: number;
+                                is_available: boolean;
                             },
                             index: number
                         ) => {
@@ -185,7 +186,7 @@ const ListIngredients: React.FC<ListIngredientsProps> = ({ isRender }) => {
 
                                     <div className="flex justify-center items-center col-span-1">
                                         <p className="text-sm text-gray-500">
-                                            {item.is_available === 1 ? (
+                                            {item.is_available === true ? (
                                                 <span className="text-green-500 text-[15px] bg-green-200 p-2 rounded-md">
                                                     Available
                                                 </span>

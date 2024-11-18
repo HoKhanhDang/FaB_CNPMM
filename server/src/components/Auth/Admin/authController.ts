@@ -36,22 +36,12 @@ const Login = async (req: Request, res: Response) => {
 };
 
 const Register = async (req: Request, res: Response) => {
-    let { email, password, name, phone, username, role, permissions } = req.body;
+    let { email, password, name, phone, role, permissions } = req.body;
 
-    if (!email || !password || !name || !phone || !username || !role) {
-        return res.status(403).json({ message: "Missing required fields" });
+    if (!email || !password || !name || !phone || !role) {
+        return res.status(400).json({ message: "Missing required fields" });
     }
 
-    if (!permissions) {
-        permissions = ["Manage Profile"];
-    } else if (Array.isArray(permissions)) {
-        if (!(permissions as string[]).includes("Manage Profile")) {
-            (permissions as string[]).push("Manage Profile");
-        }
-    } else {
-        permissions = ["Manage Profile"];
-    }
-    
     const permissionConvert = JSON.stringify(permissions);
 
     try {
@@ -60,7 +50,6 @@ const Register = async (req: Request, res: Response) => {
             email: email as string,
             password: password as string,
             phone: phone as string,
-            username: username as string,
             role: role as string,
             permission: permissionConvert,
         });

@@ -1,5 +1,5 @@
 import Input from "../../../components/commons/Input";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SelectInput from "../../../components/commons/Select";
 import { SelectChangeEvent } from "@mui/material/Select";
 import FormNutrition from "./FormNutrition";
@@ -51,10 +51,13 @@ const FormAdd: React.FC<FormAddProps> = ({ setIsAdd }) => {
         description: "",
     });
     function validateData(): boolean {
-        
         const newError = {
             title: foodDetail?.food.title === "" ? "Title is required" : "",
-            price: foodDetail?.food.price === "" || Number(foodDetail?.food.price) <0 ? "Price is required" : "",
+            price:
+                foodDetail?.food.price === "" ||
+                Number(foodDetail?.food.price) < 0
+                    ? "Price is required"
+                    : "",
             category:
                 foodDetail?.food.category === "" ? "Category is required" : "",
             description:
@@ -100,29 +103,28 @@ const FormAdd: React.FC<FormAddProps> = ({ setIsAdd }) => {
         if (nutriData !== null && id !== 0) {
             await addNutritionAPI({ item_id: id, ...nutriData });
         }
-
         //add ingredients (optional)
         if (ingData.length !== 0 && id !== 0) {
-            ingData.forEach(async (item) => {
-                await addListItemIngredientAPI({
-                    item_id: id,
-                    quantity_required: item.quantity_required,
-                    ingredient_id: item.ingredient_id,
-                });
-            });
+            await Promise.all(
+                ingData.map((item) =>
+                    addListItemIngredientAPI({
+                        item_id: id,
+                        quantity_required: item.quantity_required,
+                        ingredient_id: item.ingredient_id.ingredient_id,
+                    })
+                )
+            );
         }
         setIsLoading(false);
         toast.success("Add item successfully");
         setIsAdd(false);
     };
-    const handleChangeCategory = (event: SelectChangeEvent) => {
-        if (foodDetail) {
-            setFoodDetail({
-                ...foodDetail,
-                food: { ...foodDetail.food, category: event.target.value },
-            });
-        }
-    };
+    const handleChangeCategory = useCallback((event: SelectChangeEvent) => {
+        setFoodDetail((prev) => ({
+            ...prev,
+            food: { ...prev.food, category: event.target.value },
+        }));
+    }, []);
     const handeOpenFormNutri = () => {
         setIsOpenFormNutri(true);
     };

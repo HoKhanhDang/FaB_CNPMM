@@ -27,6 +27,8 @@ import { cancelOrderAPI, changeStatusOrderAPI } from "../order.service";
 import { GetTime } from "../../../helper/GetTimeOnDate.helper";
 import Driver from "./ListDriver";
 import SocketSingleton from "../../../socket";
+import { sendNotificationToUser } from "../../../utils/Notification/notification.utils";
+import sendNotification from "../../../socket/sendNotification";
 
 interface ListOrdersProps {
     isRender: boolean;
@@ -35,9 +37,7 @@ interface ListOrdersProps {
 const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
     const [isOpenFormDetail, setIsOpenFormDetail] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<string>("");
-    const [selectedCustomer, setSelectedCustomer] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState<string>("");
-
     const [isOpenShowSelectDriver, setIsOpenShowSelectDriver] = useState(false);
 
     const [list, setList] = useState<IOrder[]>([]);
@@ -84,6 +84,18 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                     if (rs?.status === 200) {
                         socket.emit("orderArrive", shipper_id);
                         toast.success("Change status success");
+
+                        const user_id = sessionStorage.getItem("user_id");
+                        //send notification
+                        await sendNotificationToUser({
+                            title: "Order is delivering",
+                            content: `Order #${selectedOrder} has been delivering`,
+                            type: "done",
+                            link: "/order",
+                            user_id: user_id || "",
+                        });
+                        sendNotification();
+
                         setIsOpenShowSelectDriver(false);
                         fetchData();
                     }
@@ -134,15 +146,18 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                 setList(data);
             });
         } else {
-            getOrdersByParams({
-                create_at: params.get("date"),
-                status: params.get("status"),
-                search: params.get("title"),
-                page: params.get("page") || 1,
-                limit: 10,
-            }).then((data) => {
-                setList(data);
-            });
+            setTimeout(() => {
+                getOrdersByParams({
+                    create_at: params.get("date"),
+                    status: params.get("status"),
+                    search: params.get("title"),
+                    page: params.get("page") || 1,
+                    limit: 10,
+                }).then((data) => {
+                    console.log("fetchData", data);
+                    setList(data);
+                });
+            }, 100);
         }
     };
 
@@ -165,6 +180,7 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
         });
 
         socket.on("orderCommingNotification", () => {
+            console.log("orderCommingNotification");
             fetchData();
         });
         return () => {
@@ -178,7 +194,7 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                 <OrderDetail
                     status={selectedStatus}
                     orderID={selectedOrder}
-                    userID={selectedCustomer}
+                    userID={sessionStorage.getItem("user_id") || ""}
                     setIsShowDetail={setIsOpenFormDetail}
                 />
             )}
@@ -203,7 +219,7 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                     );
                 })}
             </div>
-            {list?.length === 0 ? (
+            {list.length === 0 ? (
                 <div className="w-full h-full grid-rows-10 bg-white rounded-[30px] flex items-center justify-center p-5">
                     <span className="text-red-600 text-[25px] font-medium">
                         No item find
@@ -211,13 +227,17 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                 </div>
             ) : (
                 <div className="w-full h-full grid grid-cols-1 grid-rows-10  bg-white rounded-[30px] items-center justify-center p-[30px] ">
-                    {list?.map((item: IOrder, index: number) => {
+                    {list.map((item: IOrder, index: number) => {
                         return (
                             <div
                                 onClick={() => {
                                     setSelectedStatus(item.status);
                                     setSelectedOrder(item.order_id);
-                                    setSelectedCustomer(item.user_id);
+
+                                    sessionStorage.setItem(
+                                        "user_id",
+                                        item.user_id || ""
+                                    );
                                     setIsOpenFormDetail(true);
                                 }}
                                 key={index}
@@ -295,6 +315,10 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                                             onClick={(event) => {
                                                 event.stopPropagation();
                                                 setSelectedOrder(item.order_id);
+                                                sessionStorage.setItem(
+                                                    "user_id",
+                                                    item.user_id || ""
+                                                );
                                                 handleChangeStatus(
                                                     item.status,
                                                     undefined,
@@ -318,6 +342,10 @@ const ListOrders: React.FC<ListOrdersProps> = ({ isRender, history }) => {
                                             onClick={(event) => {
                                                 event.stopPropagation();
                                                 setSelectedOrder(item.order_id);
+                                                sessionStorage.setItem(
+                                                    "user_id",
+                                                    item.user_id || ""
+                                                );
                                                 setIsOpenShowSelectDriver(true);
                                             }}
                                             className="w-full h-full flex flex-row items-center justify-center gap-2 animate-bounce-slow"

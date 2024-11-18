@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getFoodByParamsAPI, deleteFoodAPI } from "../menu.service";
+import {
+    getFoodByParamsAPI,
+    deleteFoodAPI,
+    updateStatusFoodAPI,
+} from "../menu.service";
 import Swal from "sweetalert2";
 import FormIngredients from "./FormIngredients";
 import FormNutrition from "./FormNutrition";
@@ -8,7 +12,6 @@ import FormNutrition from "./FormNutrition";
 //icon
 import { LiaEdit } from "react-icons/lia";
 import { MdOutlineDelete } from "react-icons/md";
-import { MdAdd } from "react-icons/md";
 import { FiLink } from "react-icons/fi";
 import { FiBox } from "react-icons/fi";
 import FormatCurrency from "../../../helper/FormatCurrency.helper";
@@ -206,18 +209,38 @@ const ListItems: React.FC<ListItemsProps> = ({ setIsEdit, isRender }) => {
                                             {item.description}
                                         </p>
                                     </div>
+
                                     <div className="flex justify-center items-center col-span-1">
-                                        <p className="text-sm text-gray-500">
-                                            {item.availability === true ? (
-                                                <span className="text-green-500 text-[15px] bg-green-200 p-2 rounded-md">
-                                                    Available
-                                                </span>
-                                            ) : (
-                                                <span className="text-red-500 text-[15px] bg-red-200 p-2 rounded-md">
-                                                    Out of service
-                                                </span>
-                                            )}
-                                        </p>
+                                        <select
+                                            value={
+                                                item.availability
+                                                    ? "available"
+                                                    : "out_of_service"
+                                            }
+                                            onChange={async (e) => {
+                                                const newStatus =
+                                                    e.target.value ===
+                                                    "available";
+                                                // Call API to update status here
+                                                await updateStatusFoodAPI({
+                                                    m_id: item.item_id,
+                                                    availability: newStatus,
+                                                });
+                                                fetchData();
+                                            }}
+                                            className={`text-sm bg-white border border-gray-300 rounded-md p-2 ${
+                                                item.availability
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                            }}`}
+                                        >
+                                            <option value="available">
+                                                Available
+                                            </option>
+                                            <option value="out_of_service">
+                                                Out of service
+                                            </option>
+                                        </select>
                                     </div>
 
                                     <div className="flex justify-center items-center gap-3 col-span-2">

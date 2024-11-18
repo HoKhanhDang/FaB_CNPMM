@@ -79,7 +79,7 @@ export const createPaymentUrl = (req: Request, res: Response) => {
     vnp_Params = sortObject(vnp_Params);
 
     const signData = qs.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac("sha512", secretKey);
+    const hmac = crypto.createHmac("sha512", secretKey as string);
     const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
     vnp_Params["vnp_SecureHash"] = signed;
 
@@ -99,7 +99,7 @@ export const vnpayReturn = (req: Request, res: Response) => {
 
     const secretKey = vnp_HashSecret;
     const signData = qs.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac("sha512", secretKey);
+    const hmac = crypto.createHmac("sha512", secretKey as string);
     const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
     if (secureHash === signed) {
@@ -122,7 +122,7 @@ export const vnpayIPN = (req: Request, res: Response) => {
 
     const secretKey = vnp_HashSecret;
     const signData = qs.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac("sha512", secretKey);
+    const hmac = crypto.createHmac("sha512", secretKey as string);
     const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
     if (secureHash === signed) {

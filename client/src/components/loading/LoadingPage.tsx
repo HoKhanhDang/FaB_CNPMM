@@ -1,4 +1,4 @@
-import logo from "../../assets/image/logo.png";
+import logo from "../../assets/images/logo.png";
 export default function Loading() {
     return (
         <div className="fixed inset-0 h-screen w-screen z-50 flex justify-center items-center bg-white opacity-100">
