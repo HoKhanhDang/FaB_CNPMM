@@ -14,9 +14,16 @@ import {
 import { now } from "mongoose";
 
 const CreateOrderAPI = async (req: Request, res: Response) => {
-    const { user_id, total_price, message, payment_method, address, lng, lat } =
-        req.body;
-
+    const {
+        user_id,
+        total_price,
+        message,
+        payment_method,
+        address,
+        lng,
+        lat,
+        list_items,
+    } = req.body;
     if (user_id == null || total_price == null) {
         return res
             .status(400)
@@ -32,7 +39,13 @@ const CreateOrderAPI = async (req: Request, res: Response) => {
             address: address || null,
             lng: lng ? Number(lng) : null,
             lat: lat ? Number(lat) : null,
+            list_items: list_items,
         });
+        if (result.code === 409) {
+            return res
+                .status(409)
+                .json({ status: 409, message: "Out of stock" });
+        }
         return res
             .status(201)
             .json({ message: "Order created successfully", result });
@@ -149,13 +162,11 @@ const GetOrderByParamsAPI = async (req: Request, res: Response) => {
             page: Number(page),
             history: history as string,
         });
-        return res
-            .status(200)
-            .json({
-                message: "Orders fetched successfully",
-                result,
-                total: result.total,
-            });
+        return res.status(200).json({
+            message: "Orders fetched successfully",
+            result,
+            total: result.total,
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Internal server error" });

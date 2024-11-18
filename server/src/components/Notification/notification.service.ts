@@ -9,12 +9,16 @@ const GetNotificationService = async (): Promise<INotification[]> => {
     }
 };
 
-// Lấy thông báo theo ID
-const GetNotificationByIdService = async (nof_id: string): Promise<INotification | null> => {
+const GetNotificationByUserIdService = async (
+    user_id: string
+): Promise<INotification[]> => {
     try {
-        return await Notification.findOne({ _id: nof_id }); // Tìm thông báo theo ID
+        return await Notification.find({
+            user_id: user_id,
+            isDeleted: false,
+        }).sort({ time: -1 }); // Lấy tất cả thông báo
     } catch (error) {
-        throw new Error(`Error fetching notification by ID: ${error}`);
+        throw new Error(`Error fetching notifications: ${error}`);
     }
 };
 
@@ -22,8 +26,9 @@ const GetNotificationByIdService = async (nof_id: string): Promise<INotification
 const AddNotificationService = async (params: {
     title: string;
     content: string;
-    type: 'new' | 'done' | 'repaired' | 'ingredient' | 'failed';
+    type: "new" | "done" | "repaired" | "ingredient" | "failed";
     link: string;
+    user_id?: string;
 }): Promise<INotification> => {
     const { title, content, type, link } = params;
 
@@ -34,6 +39,7 @@ const AddNotificationService = async (params: {
         type,
         isRead: false,
         link,
+        user_id: params.user_id,
         time: new Date(),
     });
 
@@ -45,12 +51,14 @@ const AddNotificationService = async (params: {
 };
 
 // Thay đổi trạng thái đã đọc của thông báo
-const changeIsReadService = async (params: { nof_id: string }): Promise<INotification | null> => {
+const changeIsReadService = async (params: {
+    nof_id: string;
+}): Promise<INotification | null> => {
     const { nof_id } = params;
 
     try {
         const updatedNotification = await Notification.findOneAndUpdate(
-            {nof_id},
+            { nof_id },
             { isRead: true },
             { new: true }
         );
@@ -65,9 +73,28 @@ const changeIsReadService = async (params: { nof_id: string }): Promise<INotific
     }
 };
 
-export { 
-    GetNotificationService, 
-    GetNotificationByIdService, 
-    AddNotificationService, 
-    changeIsReadService 
+const DeleteAllNotificationByUserIDService = async (user_id: string) => {
+    try {
+        const notifications = await Notification.find({ user_id: user_id });
+        if (!notifications) {
+            throw new Error("Notification not found");
+        }
+        notifications.forEach(async (notification) => {
+            await Notification.findOneAndUpdate(
+                { nof_id: notification.nof_id },
+                { isDeleted: true },
+                { new: true }
+            );
+        });
+    } catch (error) {
+        throw new Error(`Error deleting notifications: ${error}`);
+    }
+};
+
+export {
+    GetNotificationService,
+    AddNotificationService,
+    changeIsReadService,
+    GetNotificationByUserIdService,
+    DeleteAllNotificationByUserIDService,
 };

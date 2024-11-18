@@ -1,7 +1,7 @@
 import { IOrderItem } from "../../../types/IOrderItem";
 import { MdDoubleArrow } from "react-icons/md";
 import FormatCurrency from "../../../utils/common/FormatCurrency";
-import FormatDay from "../../../utils/common/FormatDay";
+import {FormatDay} from "../../../utils/common/FormatDay";
 import { useState } from "react";
 import DetailOrderItem from "./DetailOrderItem";
 import { GetItemsOrderByOrderID } from "../../../utils/order/order.util";

@@ -7,6 +7,7 @@ import {
     GetAllMenu,
     GetMenuByParams,
     GetSpecialMenu,
+    UpdateStatusMenu
 } from "./menuController";
 import uploadCloud from "../../config/cloudinary.config";
 import StaffController from "../User/Admin/adminController";
@@ -15,6 +16,7 @@ const router = Router();
 
 router.post("/", AddMenu);
 router.put("/:m_id", UpdateMenu);
+router.put("/status/:m_id", UpdateStatusMenu);
 router.delete("/:m_id", DeleteMenu);
 
 // router.get("/all", GetAllMenu);

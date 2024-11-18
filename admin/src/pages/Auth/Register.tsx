@@ -1,244 +1,447 @@
-import React from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import Swal from "sweetalert2";
-import { registerAPI } from "./auth.service";
+import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
-//icons
-import { IoArrowBack } from "react-icons/io5";
-
-//MUI
-import FormControl from "@mui/joy/FormControl";
-import FormLabel from "@mui/joy/FormLabel";
-import Radio from "@mui/joy/Radio";
-import RadioGroup from "@mui/joy/RadioGroup";
-
+import { registerAPI } from "./auth.service";
 import { useNavigate } from "react-router-dom";
-import { permissionRole } from "../../helper/SelectPermission";
+import { useSelector, useDispatch } from "react-redux";
+import path from "../../utils/path";
+
+// Redux action
+import { login } from "../../redux/slice/user.slice";
+
+import swal from "sweetalert2";
+import { images } from "../../assets/assets";
+import LoginButton from "../../components/buttons/LoginButton";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+
+const permissionPath = {
+    cashier: [
+        "Manage Orders",
+        "Manage Profile",
+        "Manage History",
+        "Manage Notification",
+    ],
+    chef: ["Manage Profile", "Manage Kitchen"],
+    shipper: [],
+};
 
 export default function Register() {
     const navigate = useNavigate();
-    const [role, setRole] = React.useState("cashier");
+    const dispatch = useDispatch();
+    const [sideHeight, setSideHeight] = useState(0);
+    console.log(sideHeight);
 
-    const handleChange = (event: any) => {
-        setRole(event.target.value);
+    const [user, setUser] = useState({
+        fullName: "",
+        role: "cashier",
+        phoneNumber: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
+
+    const [error, setError] = useState({
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
+
+    const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+        useState(false);
+    const [isPasswordVisible, setPasswordVisible] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState("");
+
+    const validateAll = () => {
+        const error = {
+            fullName: user.fullName ? "" : "Full name is required",
+            phoneNumber: user.phoneNumber ? "" : "Phone number is required",
+            email: user.email ? "" : "Email is required",
+            password: user.password ? "" : "Password is required",
+            confirmPassword: user.confirmPassword
+                ? ""
+                : "Confirm password is required",
+        };
+
+        setError(error);
+
+        return Object.values(error).every((e) => e === "");
+    };
+    const handleSubmit = async () => {
+        validateAll();
+        if (
+            error.fullName ||
+            error.phoneNumber ||
+            error.email ||
+            error.password ||
+            error.confirmPassword
+        ) {
+            return;
+        }
+        if (user.password !== user.confirmPassword) {
+            setError({ ...error, confirmPassword: "Password does not match" });
+            return;
+        }
+        const rs = await registerAPI({
+            name: user.fullName.trim(),
+            role: user.role,
+            permissions:
+                permissionPath[user.role as "cashier" | "chef" | "shipper"],
+            phone: user.phoneNumber.trim(),
+            email: user.email.trim(),
+            password: user.password.trim(),
+        });
+        const { status } = rs;
+        if (status === 200) {
+            swal.fire({
+                icon: "success",
+                title: "Register successfully",
+            }).then(() => {
+                navigate(path.login);
+            });
+        } else if (status === 410) {
+            setError({ ...error, email: "Email already exist" });
+        } else if (status === 411) {
+            setError({ ...error, phoneNumber: "Phone number already exist" });
+        } else {
+            swal.fire({
+                icon: "error",
+                title: "Register failed",
+                text: rs?.data?.message || "Some thing went wrong",
+            });
+        }
     };
 
-    const RegisterSchema = useFormik({
-        initialValues: {
-            name: "",
-            username: "",
-            email: "",
-            password: "",
-            phone: "",
-            confirmPassword: "",
-        },
-        validationSchema: Yup.object({
-            name: Yup.string().required("Name is required"),
-            username: Yup.string().required("Username is required"),
-            email: Yup.string()
-                .email("Invalid email")
-                .required("Email is required"),
-            password: Yup.string()
-                .required("Password is required")
-                .min(8, "Password must be at least 8 characters")
-                .matches(
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
-                    "Password must contain one uppercase, one lowercase and one number"
-                ),
-            confirmPassword: Yup.string().required(
-                "Confirm Password is required"
-            ),
+    const togglePasswordVisibility = () =>
+        setPasswordVisible(!isPasswordVisible);
 
-            phone: Yup.string()
-                .matches(
-                    /^[0-9]{10}$/,
-                    "Phone number must be exactly 10 digits"
-                )
-                .required("Phone is required"),
-        }),
-        onSubmit: async (values: {
-            name: string;
-            username: string;
-            email: string;
-            password: string;
-            phone: string;
-            confirmPassword: string;
-        }) => {
-            const data = {
-                ...values,
-                phone: values.phone,
-                role,
-                permissions: permissionRole(role),
-            };
-            if ((values.password !== values.confirmPassword) == true) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Almost!",
-                    text: "Password and Confirm Password must be the same",
-                }).then(() => {
-                    navigate("/register");
-                    return;
-                });
-            } else {
-             
-                const rs: AxiosResponse<any> = await registerAPI(data);
+    const toggleConfirmPasswordVisibility = () =>
+        setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
 
-                if (rs.status === 200) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Register successfully",
-                    }).then(() => {
-                        navigate("/login");
-                    });
-                } else if (rs.status === 400) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Register failed",
-                        text: "Email is already exist",
-                    }).then(() => {
-                        navigate("/register");
-                    });
-                } else if (rs.status === 401) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Register failed",
-                        text: "Phone number is already exist",
-                    }).then(() => {
-                        navigate("/register");
-                    });
-                }
-            }
-        },
-    });
+    const validateEmail = (value: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setError({
+            ...error,
+            email: emailRegex.test(value) ? "" : "Invalid email format",
+        });
+    };
+
+    const evaluatePasswordStrength = (value: string) => {
+        if (value.length < 6) {
+            setPasswordStrength("Weak");
+        } else if (value.length < 10) {
+            setPasswordStrength("Medium");
+        } else {
+            setPasswordStrength("Strong");
+        }
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setUser({ ...user, email: value });
+        validateEmail(value);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setUser({ ...user, password: value });
+        evaluatePasswordStrength(value);
+    };
+
+    const handleConfirmPasswordChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const value = e.target.value;
+        setUser({ ...user, confirmPassword: value });
+        setError({
+            ...error,
+            confirmPassword:
+                value === user.password ? "" : "Password does not match",
+        });
+    };
+
+    useEffect(() => {
+        setSideHeight(document.getElementById("side")?.clientHeight || 0);
+    }, []);
     return (
-        <div className="w-screen h-screen flex justify-center items-center bg-slate-200">
-            <div className="p-5 w-1/3 h-auto bg-white rounded-[30px]  flex flex-col justify-center items-center">
-                <div className="text-[30px] font-bold relative w-full flex justify-center">
-                    <IoArrowBack
-                        onClick={() => {
-                            navigate("/login");
-                        }}
-                        className=" absolute left-0 top-2"
-                    />
-                    Register
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:justify-between h-auto bg-white gap-5 p-5">
+            {/* Left Section */}
+            <div
+                className="hidden lg:flex w-full lg:w-1/2 bg-white text-white justify-center items-center relative rounded-[30px] overflow-hidden"
+                style={{
+                    height: sideHeight,
+                }}
+            >
+                <img
+                    src={images.loginBackground}
+                    className={`w-full h-full  object-cover `}
+                    alt="Login Background"
+                />
+                <div className="absolute inset-0 bg-black opacity-50"></div>
+                <div className="absolute text-start p-5 top-5 left-5 ">
+                    <h2 className="text-[50px] font-bold mb-4">
+                        Join Us Today!
+                    </h2>
+                    <p className="text-lg ">
+                        Unlock the tools to transform your business. Start your
+                        journey now and take charge of your growth with insights
+                        and strategies that matter. Your success begins here!
+                    </p>
                 </div>
-                <form
-                    onSubmit={RegisterSchema.handleSubmit}
-                    className="flex flex-col gap-1 w-full"
-                >
-                    <span>Full Name</span>
-                    <input
-                        type="text"
-                        placeholder="Name"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("name")}
-                    />
+            </div>
 
-                    <FormControl>
-                        <FormLabel>Role</FormLabel>
-                        <RadioGroup
-                            defaultValue="cashier"
-                            name="radio-buttons-group"
-                            value={role}
-                            onChange={handleChange}
-                            orientation="horizontal"
+            {/* Right Section */}
+            <div
+                id="side"
+                className="w-full lg:w-1/2 h-full flex flex-col justify-center items-start py-8 lg:py-16 px-8 lg:px-24 rounded-[30px] bg-gray-50"
+            >
+                <div className="text-4xl font-extrabold mb-4 flex flex-col">
+                    <span>Welcome to</span>
+                    <span>Hephaestus Restaurant</span>
+                </div>
+                <div className="w-full max-w-md space-y-3">
+                    <div>
+                        <label
+                            htmlFor="fullName"
+                            className="block text-gray-700 font-medium mb-2"
                         >
-                            <Radio
-                                value="cashier"
-                                label="Cashier"
-                                variant="outlined"
+                            Full Name
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                id="fullName"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                placeholder="Enter your full name"
+                                value={user.fullName}
+                                onChange={(e) =>
+                                    setUser({
+                                        ...user,
+                                        fullName: e.target.value,
+                                    })
+                                }
                             />
-                            <Radio value="chef" label="Chef" variant="soft" />
-                            <Radio value="admin" label="Admin" variant="soft" />
-                        </RadioGroup>
-                    </FormControl>
-
-                    <span>Phone Number</span>
-                    <input
-                        type="text"
-                        placeholder="Phone"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("phone")}
-                    />
-
-                    <span>User Name</span>
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("username")}
-                    />
-                    <span>Email</span>
-                    <input
-                        type="text"
-                        placeholder="Email"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("email")}
-                    />
-                    <span>Password</span>
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("password")}
-                    />
-                    <span>Confirm Password</span>
-                    <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        className="p-2 border border-gray-300 rounded-md w-full h-[35px]"
-                        {...RegisterSchema.getFieldProps("confirmPassword")}
-                    />
-
-                    {RegisterSchema.touched.name &&
-                    RegisterSchema.errors.name ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.name}
                         </div>
-                    ) : null}
-
-                    {RegisterSchema.touched.username &&
-                    RegisterSchema.errors.username ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.username}
+                        {error.fullName && (
+                            <p className="text-sm text-red-500 mt-2">
+                                {error.fullName}
+                            </p>
+                        )}
+                    </div>
+                    {/* Email Input */}
+                    <div>
+                        <label
+                            htmlFor="email"
+                            className="block text-gray-700 font-medium mb-2"
+                        >
+                            Email Address
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="email"
+                                id="email"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                placeholder="Enter your email"
+                                value={user.email}
+                                onChange={handleEmailChange}
+                            />
                         </div>
-                    ) : null}
-
-                    {RegisterSchema.touched.phone &&
-                    RegisterSchema.errors.phone ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.phone}
+                        {error.email && (
+                            <p className="text-sm text-red-500 mt-2">
+                                {error.email}
+                            </p>
+                        )}
+                    </div>
+                    {/* Role Input */}
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">
+                            Role
+                        </label>
+                        <div className="flex items-center space-x-4">
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="cashier"
+                                    checked={user.role === "cashier"}
+                                    onChange={(e) =>
+                                        setUser({
+                                            ...user,
+                                            role: e.target.value,
+                                        })
+                                    }
+                                    className="form-radio h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-2 text-gray-700">
+                                    Cashier
+                                </span>
+                            </label>
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="chef"
+                                    checked={user.role === "chef"}
+                                    onChange={(e) =>
+                                        setUser({
+                                            ...user,
+                                            role: e.target.value,
+                                        })
+                                    }
+                                    className="form-radio h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-2 text-gray-700">Chef</span>
+                            </label>
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="shipper"
+                                    checked={user.role === "shipper"}
+                                    onChange={(e) =>
+                                        setUser({
+                                            ...user,
+                                            role: e.target.value,
+                                        })
+                                    }
+                                    className="form-radio h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-2 text-gray-700">
+                                    Shipper
+                                </span>
+                            </label>
                         </div>
-                    ) : null}
+                    </div>
 
-                    {RegisterSchema.touched.email &&
-                    RegisterSchema.errors.email ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.email}
+                    {/* Phone Number Input */}
+                    <div>
+                        <label
+                            htmlFor="phoneNumber"
+                            className="block text-gray-700 font-medium mb-2"
+                        >
+                            Phone Number
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                id="phoneNumber"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                placeholder="Enter your phone number"
+                                value={user.phoneNumber}
+                                onChange={(e) =>
+                                    setUser({
+                                        ...user,
+                                        phoneNumber: e.target.value,
+                                    })
+                                }
+                            />
                         </div>
-                    ) : null}
+                        {error.phoneNumber && (
+                            <p className="text-sm text-red-500 mt-2">
+                                {error.phoneNumber}
+                            </p>
+                        )}
+                    </div>
+                    {/* Password Input */}
+                    <div>
+                        <label
+                            htmlFor="password"
+                            className="block text-gray-700 font-medium mb-2"
+                        >
+                            Password
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={isPasswordVisible ? "text" : "password"}
+                                id="password"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                placeholder="Enter your password"
+                                value={user.password}
+                                onChange={handlePasswordChange}
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-800"
+                            >
+                                {isPasswordVisible ? (
+                                    <AiOutlineEyeInvisible size={20} />
+                                ) : (
+                                    <AiOutlineEye size={20} />
+                                )}
+                            </button>
+                        </div>
+                        {user.password && (
+                            <p
+                                className={`text-sm mt-2 ${
+                                    passwordStrength === "Weak"
+                                        ? "text-red-500"
+                                        : passwordStrength === "Medium"
+                                        ? "text-yellow-500"
+                                        : "text-green-500"
+                                }`}
+                            >
+                                Password Strength: {passwordStrength}
+                            </p>
+                        )}
+                    </div>
+                    {/* Confirm Password Input */}
+                    <div>
+                        <label
+                            htmlFor="confirmPassword"
+                            className="block text-gray-700 font-medium mb-2"
+                        >
+                            Confirm Password
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={
+                                    isConfirmPasswordVisible
+                                        ? "text"
+                                        : "password"
+                                }
+                                id="confirmPassword"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                placeholder="Confirm your password"
+                                value={user.confirmPassword}
+                                onChange={handleConfirmPasswordChange}
+                            />
+                            <button
+                                type="button"
+                                onClick={toggleConfirmPasswordVisibility}
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-800"
+                            >
+                                {isConfirmPasswordVisible ? (
+                                    <AiOutlineEyeInvisible size={20} />
+                                ) : (
+                                    <AiOutlineEye size={20} />
+                                )}
+                            </button>
+                        </div>
+                        {error.confirmPassword && (
+                            <p className="text-sm text-red-500 mt-2">
+                                *{error.confirmPassword}
+                            </p>
+                        )}
+                    </div>
 
-                    {RegisterSchema.touched.password &&
-                    RegisterSchema.errors.password ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.password}
-                        </div>
-                    ) : null}
-                    {RegisterSchema.touched.confirmPassword &&
-                    RegisterSchema.errors.confirmPassword ? (
-                        <div className="text-[12px] text-red-600">
-                            *{RegisterSchema.errors.confirmPassword}
-                        </div>
-                    ) : null}
-
-                    <button
-                        type="submit"
-                        className="p-2 bg-blue-500 text-white rounded-md mt-3"
+                    <div className="w-full flex justify-center items-center pt-2">
+                        <LoginButton
+                            text="Register"
+                            onclick={() => handleSubmit()}
+                        />
+                    </div>
+                </div>
+                <p className="text-gray-600 text-sm mt-6">
+                    Already have an account?{" "}
+                    <span
+                        onClick={() => navigate(path.login)}
+                        className="text-blue-500 hover:underline cursor-pointer"
                     >
-                        Register
-                    </button>
-                </form>
+                        Login here
+                    </span>
+                </p>
             </div>
         </div>
     );

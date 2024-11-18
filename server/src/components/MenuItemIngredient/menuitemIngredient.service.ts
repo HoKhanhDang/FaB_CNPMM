@@ -54,6 +54,12 @@ const GetIngredientFromMenuService = async (ingredient: {
         // Truy vấn và populate các trường cần thiết từ menuitemingredients và ingredients
         return await MenuItemIngredient.find({
             item_id: ingredient.item_id,
+        }).populate({
+            path: "ingredient_id",
+            select: "name",
+            model: "Ingredient",
+            localField: "ingredient_id",
+            foreignField: "ingredient_id",
         }).select("ingredient_id item_id quantity_required"); // Lấy các trường cần thiết từ menuitemingredients
     } catch (err) {
         throw new Error(`Error fetching ingredients from menu: ${err}`);

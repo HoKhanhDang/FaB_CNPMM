@@ -20,7 +20,7 @@ router.put("/admin/:user_id", verifyToken, StaffControllder.UpdateUser);
 router.put("/admin/permission/:user_id", verifyToken, StaffControllder.UpdatePermission);
 /////////////
 
-router.delete("/:user_id", verifyToken, StaffControllder.DeleteStaff);
+router.delete("/admin/:user_id", verifyToken, StaffControllder.DeleteStaff);
 router.post(
     "/image",
     verifyToken,

@@ -6,7 +6,10 @@ export interface IIngredients {
     name?: string;
     item_id?: string;
     quantity_required?: number;
-    ingredient_id: string;
+    ingredient_id: {
+        ingredient_id: string;
+        name: string;
+    };
 }
 
 export interface INutrition {

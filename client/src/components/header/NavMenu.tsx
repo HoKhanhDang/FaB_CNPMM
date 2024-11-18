@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../redux/slice/user.slice";
 const navItems = [
@@ -7,7 +7,6 @@ const navItems = [
     { name: "Menu", path: "/menu" },
     { name: "Contact", path: "/contact" },
     { name: "Profile", path: "/profile" },
-    { name: "Log out", path: "/auth" },
 ];
 
 interface NavMenuProps {
@@ -15,8 +14,18 @@ interface NavMenuProps {
 }
 
 const NavMenu: React.FC<NavMenuProps> = ({ handleOpenMenu }) => {
+    const { isLogin } = useSelector((state: any) => state.customerSlice);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const handleAuth = () => {
+        if (isLogin) {
+            dispatch(logout());
+            navigate("/");
+        } else {
+            navigate("/auth/login");
+        }
+    };
     return (
         <div className="fixed inset-0 top-0 w-full h-full bg-orange-600 bg-opacity-90 z-50">
             <div className="absolute top-5 right-5">
@@ -32,11 +41,6 @@ const NavMenu: React.FC<NavMenuProps> = ({ handleOpenMenu }) => {
                     {navItems.map((item) => (
                         <div
                             onClick={() => {
-                                {
-                                    window.localStorage.removeItem("persist:cart");
-                                    item.name === "Log out" &&
-                                        dispatch(logout());
-                                }
                                 navigate(item.path);
                                 handleOpenMenu();
                             }}
@@ -46,6 +50,12 @@ const NavMenu: React.FC<NavMenuProps> = ({ handleOpenMenu }) => {
                             {item.name}
                         </div>
                     ))}
+                    <div
+                        onClick={handleAuth}
+                        className="text-3xl !opacity-100 hover:text-green-700 text-white font-medium cursor-pointer"
+                    >
+                        {isLogin ? "Logout" : "Login"}
+                    </div>
                 </div>
             </div>
         </div>

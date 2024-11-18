@@ -6,6 +6,8 @@ interface INotification extends Document {
     title?: string;
     content?: string;
     isRead?: boolean;
+    isDeleted?: boolean;
+    user_id?: string;
     type?: 'new' | 'done' | 'repaired' | 'ingredient' | 'failed';
     time?: Date;
     link?: string;
@@ -19,6 +21,11 @@ const NotificationSchema: Schema = new Schema({
         unique: true,
         autoIncrement: true,
     },
+    user_id: {
+        type: Schema.Types.ObjectId,
+        default: null,
+        ref: 'User',
+    },
     title: {
         type: String,
         default: null,
@@ -30,6 +37,10 @@ const NotificationSchema: Schema = new Schema({
     isRead: {
         type: Boolean,
         default: null,
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
     },
     type: {
         type: String,

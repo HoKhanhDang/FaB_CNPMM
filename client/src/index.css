@@ -22,6 +22,9 @@ html {
 .transform_z {
     @apply transform transition-transform duration-300 hover:scale-105;
 }
+.text-glow {
+    -webkit-text-stroke: 1px transparent;
+}
 
 
 .scrollbar-hidden {
@@ -46,7 +49,7 @@ html {
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #092652;
+    background: #FFF7ED
 }
 
 @keyframes scroll {
@@ -75,4 +78,8 @@ html {
 /* Kiểu dáng cho các phần tử trong cột */
 .my-masonry-grid_column > div {
     margin-bottom: 15px;
+}
+
+#side input {
+    border-radius: 30px;
 }

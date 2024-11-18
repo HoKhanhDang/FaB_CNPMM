@@ -24,13 +24,13 @@ const login = async (
         const user = await User.findOne({ email });
 
         if (!user) {
-            throw { status: 410, message: "Email không tồn tại" };
+            throw { status: 400, message: "Email không tồn tại" };
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            throw { status: 411, message: "Mật khẩu không đúng" };
+            throw { status: 401, message: "Mật khẩu không đúng" };
         }
 
         const token = jwt.sign(
@@ -135,7 +135,6 @@ const register = async (
 
         const newUser = new User({
             user_id: new ObjectId(),
-            username: "customer",
             fullName: name,
             email,
             phone,

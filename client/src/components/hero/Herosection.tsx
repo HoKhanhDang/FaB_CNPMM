@@ -1,5 +1,5 @@
 import React from "react";
-import image1 from "../../assets/image/hero.png";
+import image1 from "../../assets/images/hero.png";
 
 type HeroSectionProps = {
     title: string;

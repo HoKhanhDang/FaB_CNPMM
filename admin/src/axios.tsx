@@ -1,6 +1,6 @@
 import axios from "axios";
 const instance = axios.create({
-    baseURL: process.env.REACT_APP_URL_SERVER + "/api",
+    baseURL:`${process.env.REACT_APP_URL_SERVER}/api`,
 });
 
 instance.interceptors.request.use(
@@ -24,10 +24,10 @@ instance.interceptors.response.use(
         return response;
     },
     function (error) {
-        if (error?.response?.status === 403) {
-            window.localStorage.removeItem("persist:user");
-            window.location.href = "/#/login";
-        }   
+        // if (error?.response?.status === 403) {
+        //     window.localStorage.removeItem("persist:user");
+        //     window.location.href = "/login";
+        // }   
         return error?.response?.data;
     }
 );

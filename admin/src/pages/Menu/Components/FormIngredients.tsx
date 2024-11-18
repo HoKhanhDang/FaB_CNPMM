@@ -11,7 +11,6 @@ import {
     getIngredientAPI,
     getIngredientByItemIdAPI,
 } from "../../Ingredient/ingredient.service";
-import { set } from "date-fns";
 
 import { IIngredients } from "../../../types/menu.interface";
 
@@ -33,7 +32,6 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
     const [listIngredients, setListIngredients] = useState<IIngredients[]>(
         list || []
     );
-
     const [isAdd, setIsAdd] = useState(false);
     const [titleAdd, setTitleAdd] = useState("");
     const [idAdd, setIdAdd] = useState("");
@@ -43,32 +41,23 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
         setIsAdd(!isAdd);
         setTitleAdd("");
         setQuantityAdd(1);
-        // if (listIngredients[0]?.title === "") {
-        //     return;
-        // }
-        // setListIngredients([
-        //     {
-        //         title: "",
-        //         quantityRequired: 1,
-        //     },
-        //     ...listIngredients,
-        // ]);
     };
+
     const handleDeleteItem = (index: number) => {
         const newList = [...listIngredients];
         newList.splice(index, 1);
         setListIngredients(newList);
     };
+
     const handleSave = async () => {
         if (isAdd) {
-            //validate
             if (titleAdd === "" || quantityAdd === 0) {
                 setIsAdd(!isAdd);
                 return;
             }
             let itemExisted = false;
             listIngredients.forEach((item) => {
-                if (item.name === titleAdd) {
+                if (item.ingredient_id.name === titleAdd) {
                     itemExisted = true;
                 }
             });
@@ -76,17 +65,18 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
                 toast.error("This item is already existed");
                 return;
             }
-            //
-
-            setListIngredients([
-                ...listIngredients,
+            setListIngredients((prev) => [
+                ...prev,
                 {
-                    name: titleAdd,
                     item_id: item_id,
                     quantity_required: quantityAdd,
-                    ingredient_id: idAdd,
+                    ingredient_id: {
+                        ingredient_id: idAdd,
+                        name: titleAdd,
+                    },
                 },
             ]);
+
             setTitleAdd("");
             setQuantityAdd(1);
             setIsAdd(!isAdd);
@@ -94,16 +84,16 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
         }
         if (isEdit) {
             if (listIngredients.length !== 0) {
-                const rs = await deleteAllListItemIngredientAPI({
-                    item_id: item_id,
-                });
-                listIngredients?.forEach(async (item) => {
-                    await addListItemIngredientAPI({
-                        item_id: item_id,
-                        quantity_required: item.quantity_required,
-                        ingredient_id: item.ingredient_id,
-                    });
-                });
+                await deleteAllListItemIngredientAPI({ item_id: item_id });
+                await Promise.all(
+                    listIngredients.map((item) =>
+                        addListItemIngredientAPI({
+                            item_id: item_id,
+                            quantity_required: item.quantity_required,
+                            ingredient_id: item.ingredient_id.ingredient_id,
+                        })
+                    )
+                );
             }
             toast.success("Update successfully");
             setIsOpenFormIngre(false);
@@ -115,7 +105,6 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
         setIsOpenFormIngre(false);
     };
 
-    //list Ingredients data
     const fetchData = async () => {
         if (item_id && list === undefined) {
             const rs = await getIngredientByItemIdAPI(item_id);
@@ -124,43 +113,46 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
         const rs = await getIngredientAPI();
         return rs?.data?.result;
     };
-    const { data, error, isLoading } = useQuery({
-        queryKey: ["ingredients"],
+
+    const { data } = useQuery({
+        queryKey: ["ingredientsItem"],
         queryFn: fetchData,
     });
 
     useEffect(() => {
         fetchData();
     }, []);
-    return (
-        <div className="fixed inset-0 z-50 bg-opacity-50 bg-white w-screen h-screen p-[100px] flex justify-center items-center">
-            <div className=" relative bg-white w-1/2 h-full flex gap-3 flex-col shadow-2xl rounded-md p-5">
-                <div
-                    onClick={() => setIsOpenFormIngre(false)}
-                    className="hover:text-red-500 absolute top-5 right-5 text-[30px] text-red font-bold cursor-pointer"
-                >
-                    X
-                </div>
-                <span className="text-[30px] font-bold h-[10%] self-center ">
-                    Ingredients Information
-                </span>
 
-                <div className="grid grid-cols-3 grid-rows-1 px-[50px] text-[20px] font-bold border-b py-5">
+    return (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 w-screen h-screen flex justify-center items-center">
+            <div className="relative bg-white w-full max-w-2xl h-[80%] flex flex-col gap-6 shadow-lg rounded-lg p-8">
+                <button
+                    onClick={() => setIsOpenFormIngre(false)}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl font-bold"
+                >
+                    &times;
+                </button>
+                <h2 className="text-3xl font-semibold text-center">
+                    Ingredients Information
+                </h2>
+
+                <div className="grid grid-cols-3 items-center px-6 py-4 text-lg font-medium border-b">
                     <span>Title</span>
-                    <span>Quantity Required</span>
-                    <div className="w-full flex justify-center">
-                        <div
+                    <span>Quantity</span>
+                    <div className="flex justify-center">
+                        <button
                             onClick={handleAddItem}
-                            className="flex flex-row items-center justify-center text-[15px] bg-blue-400 text-blue-100 rounded-md p-1 hover:text-blue-500 cursor-pointer"
+                            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                         >
-                            <IoAddOutline className="text-[20px]" />{" "}
-                            {!isAdd ? "Add item" : "Undo"}
-                        </div>
+                            <IoAddOutline className="mr-1" />
+                            {!isAdd ? "Add Item" : "Cancel"}
+                        </button>
                     </div>
                 </div>
-                <div className="h-[80%] w-full overflow-y-auto px-[50px] gap-2">
+
+                <div className="h-[60vh] overflow-y-auto px-6 py-2 space-y-4">
                     {isAdd && (
-                        <div className="grid grid-cols-2 grid-rows-1 sticky top-0 gap-2">
+                        <div className="grid grid-cols-3 gap-4 items-center mb-4">
                             <select
                                 onChange={(e) => {
                                     setTitleAdd(
@@ -169,13 +161,14 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
                                     setIdAdd(e.target.value);
                                 }}
                                 value={idAdd}
-                                className="border border-blue-300 p-2 rounded-xl"
+                                className="border border-gray-300 p-3 rounded-md"
                             >
+                                <option value="">Select Ingredient</option>
                                 {data?.map(
                                     (
                                         item: {
-                                            name: string;
                                             ingredient_id: string;
+                                            name: string;
                                         },
                                         index: number
                                     ) => (
@@ -190,77 +183,57 @@ const FormIngredients: React.FC<FormIngretionProps> = ({
                             </select>
                             <input
                                 type="number"
-                                min={0}
+                                min={1}
                                 value={quantityAdd}
-                                onChange={(e) => {
-                                    setQuantityAdd(Number(e.target.value));
-                                }}
-                                className="border border-blue-300 p-2 rounded-xl"
+                                onChange={(e) =>
+                                    setQuantityAdd(Number(e.target.value))
+                                }
+                                className="border border-gray-300 p-3 rounded-md"
                                 placeholder="Quantity"
                             />
                         </div>
                     )}
-                    {listIngredients?.map((item, index) => {
-                        return (
-                            <div
-                                key={index}
-                                className="grid grid-cols-3 grid-rows-1 gap-2 my-2"
+
+                    {listIngredients.map((item, index) => (
+                        <div
+                            key={index}
+                            className="grid grid-cols-3 gap-4 items-center"
+                        >
+                            <input
+                                value={item.ingredient_id.name}
+                                className="border border-gray-300 p-3 rounded-md bg-gray-50"
+                                disabled
+                            />
+                            <input
+                                type="number"
+                                min={0}
+                                value={item.quantity_required}
+                                onChange={(e) => {
+                                    const newList = [...listIngredients];
+                                    newList[index].quantity_required = Number(
+                                        e.target.value
+                                    );
+                                    setListIngredients(newList);
+                                }}
+                                className="border border-gray-300 p-3 rounded-md"
+                            />
+                            <button
+                                onClick={() => handleDeleteItem(index)}
+                                className="flex justify-center items-center text-red-500 hover:text-red-600"
                             >
-                                <select
-                                    value={item.name}
-                                    onChange={(e) => {
-                                        const newList = [...listIngredients];
-                                        newList[index].name = e.target.value;
-                                        setListIngredients(newList);
-                                    }}
-                                    className="border p-2 rounded-xl"
-                                >
-                                    {data?.map(
-                                        (
-                                            item: {
-                                                name: string;
-                                            },
-                                            index: number
-                                        ) => (
-                                            <option
-                                                key={index}
-                                                value={item.name}
-                                            >
-                                                {item.name}
-                                            </option>
-                                        )
-                                    )}
-                                </select>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={item.quantity_required}
-                                    onChange={(e) => {
-                                        const newList = [...listIngredients];
-                                        newList[index].quantity_required =
-                                            Number(e.target.value);
-                                        setListIngredients(newList);
-                                    }}
-                                    className="p-2 rounded-xl border"
-                                />
-                                <div className="w-full flex justify-center items-center">
-                                    <MdDeleteForever
-                                        onClick={() => handleDeleteItem(index)}
-                                        className="text-red-500 text-[30px] self-center hover:text-red-200"
-                                    />
-                                </div>
-                            </div>
-                        );
-                    })}
+                                <MdDeleteForever className="text-2xl" />
+                            </button>
+                        </div>
+                    ))}
                 </div>
 
                 <button
                     onClick={handleSave}
-                    className={
+                    className={`w-full py-3 rounded-md text-white text-lg ${
                         isAdd
-                            ? "bg-red-500 text-white p-2 rounded-md h-[10%] "
-                            : "bg-blue-500 text-white p-2 rounded-md h-[10%] "
-                    }
+                            ? "bg-red-500 hover:bg-red-600"
+                            : "bg-blue-500 hover:bg-blue-600"
+                    }`}
                 >
                     {isAdd ? "Confirm" : "Save"}
                 </button>

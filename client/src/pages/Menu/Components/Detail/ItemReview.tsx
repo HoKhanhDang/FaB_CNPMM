@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { GetRatingByItemID } from "../../../../utils/rating/rating.util";
-import FormatDay from "../../../../utils/common/FormatDay";
+import {FormatDay} from "../../../../utils/common/FormatDay";
 interface FoodRatingProps {
     item_id: string;
 }

@@ -50,23 +50,22 @@ const registerUser = async (data: {
     email: string;
     password: string;
     phone: string;
-    username: string;
     role: string;
     permission?: any;
 }): Promise<{ message: string; data: IUser }> => {
-    const { name, email, password, phone, role, username, permission } = data;
+    const { name, email, password, phone, role, permission } = data;
 
     try {
         // Kiểm tra email đã tồn tại chưa
         const emailExists = await User.findOne({ email });
         if (emailExists) {
-            throw { status: 400, message: "Email already exists" };
+            throw { status: 410, message: "Email already exists" };
         }
 
         // Kiểm tra số điện thoại đã tồn tại chưa
         const phoneExists = await User.findOne({ phone });
         if (phoneExists) {
-            throw { status: 401, message: "Phone Number already exists" };
+            throw { status: 411, message: "Phone Number already exists" };
         }
 
 
@@ -76,7 +75,6 @@ const registerUser = async (data: {
             email,
             password,
             phone,
-            username,
             role,
             permissions: permission || {},
             status: "active", // hoặc trạng thái mặc định

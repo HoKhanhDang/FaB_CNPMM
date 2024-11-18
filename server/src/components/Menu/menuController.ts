@@ -43,7 +43,7 @@ const GetAllMenu = async (req: Request, res: Response) => {
 
 const UpdateMenu = async (req: Request, res: Response) => {
     const { title, price, description, image, category } = req.body;
-    const m_id  = req.params.m_id; // Sử dụng req.params để lấy ID
+    const m_id = req.params.m_id; // Sử dụng req.params để lấy ID
 
     if (!title || !price || !description || !image || !category || !m_id) {
         return res.status(400).json({ message: "All fields are required" });
@@ -61,6 +61,30 @@ const UpdateMenu = async (req: Request, res: Response) => {
         return res
             .status(200)
             .json({ message: "Menu updated successfully", data: result });
+    } catch (err: any) {
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+const UpdateStatusMenu = async (req: Request, res: Response) => {
+    const { availability } = req.body;
+    const m_id = req.params.m_id; // Sử dụng req.params để lấy ID
+
+    if (availability === undefined || !m_id) {
+        return res.status(400).json({ message: "Availability is required" });
+    }
+
+    try {
+        const result = await UpdateMenuService({
+            item_id: m_id as string,
+            availability,
+        });
+        return res
+            .status(200)
+            .json({
+                message: "Menu availability updated successfully",
+                data: result,
+            });
     } catch (err: any) {
         return res.status(500).json({ message: err.message });
     }
@@ -138,4 +162,5 @@ export {
     GetMenuByParams,
     GetMenuById,
     GetSpecialMenu,
+    UpdateStatusMenu
 };

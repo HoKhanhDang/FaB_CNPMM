@@ -25,7 +25,7 @@ const ProductList: React.FC<ProductListProps> = ({}) => {
                 }
                 {items.map(
                     (product: {
-                        id: number;
+                        id: string;
                         title: string;
                         price: number;
                         quantity: number;

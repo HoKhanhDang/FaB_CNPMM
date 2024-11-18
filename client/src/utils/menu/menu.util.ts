@@ -1,5 +1,9 @@
-import { getFoodDetailAPI, getMenuAPI, getSpecialMenuAPI } from './menu.service';
-import { IFoodItem } from '../../types/IFood';
+import {
+    getFoodDetailAPI,
+    getMenuAPI,
+    getSpecialMenuAPI,
+} from "./menu.service";
+import { IFoodItem } from "../../types/IFood";
 export const getMenu = async (params: any) => {
     try {
         const rs = await getMenuAPI(params);
@@ -16,7 +20,7 @@ export const getSpecialMenu = async () => {
     } catch (error) {
         console.log(error);
     }
-}
+};
 
 export const getFoodDetail = async (id: string) => {
     try {
@@ -25,4 +29,4 @@ export const getFoodDetail = async (id: string) => {
     } catch (error) {
         console.log(error);
     }
-}
+};

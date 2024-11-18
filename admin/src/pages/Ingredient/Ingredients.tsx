@@ -24,13 +24,13 @@ export default function Ingredient() {
         const rs = await getSumIngredientAPI(data);
         setTotalPage(Math.ceil(rs?.data?.result[0] / limit));
     };
+    
 
     useEffect(() => {
         fetchData();
 
     }, [params, isRender]);
     return (
-
             <div className="w-full h-full bg-main-bg col-span-5 row-span-12   ">
                 {isAdd && <FormAdd isOpen={setIsAdd} setIsRender={setIsRender} isRender={isRender} />}
 

@@ -39,6 +39,14 @@ export const updateFoodAPI = async (data: any) => {
     });
 };
 
+export const updateStatusFoodAPI = async (data: any) => {
+    return await axios({
+        method: "PUT",
+        url: `/menu-item/status/${data.m_id}`,
+        data,
+    });
+};
+
 export const deleteFoodAPI = async (id: any) => {
     return await axios({
         method: "DELETE",

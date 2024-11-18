@@ -20,7 +20,7 @@ const FoodMenuSpecial: React.FC<FoodItemProps> = ({
                 alt="Food menu header"
                 className="object-contain w-full shadow-sm aspect-[3.76] max-md:max-w-full"
             />
-            <section className="mt-6 max-md:mr-2 max-md:max-w-full">
+            <section className="mt-6 max-md:mr-2 max-md:max-w-full w-full">
                 <div className="flex gap-5 max-md:flex-col">
                     {items?.slice(0, 2).map((item, index) => (
                         <FoodItem key={index} {...item} />

@@ -4,4 +4,5 @@ export interface IFoodItem {
     description: string;
     price: number;
     image: string;
+    availability: boolean;
 }

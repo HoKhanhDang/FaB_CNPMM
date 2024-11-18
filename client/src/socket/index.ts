@@ -7,7 +7,7 @@ class SocketSingleton {
     public static getInstance(): Socket {
         if (!SocketSingleton.instance) {
             SocketSingleton.instance = io(apiUrl, {
-                autoConnect: false,
+                autoConnect: true,
                 reconnection: true,
                 reconnectionDelay: 1000,
                 reconnectionDelayMax: 5000,

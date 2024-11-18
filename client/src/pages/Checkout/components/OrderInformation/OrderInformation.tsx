@@ -5,15 +5,19 @@ import PaymentMethod from "./SelectPaymentMethod";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+const apiUrl = import.meta.env.VITE_URL_SERVER;
 import {
     AddOrderItem,
     CreateOrder,
     CreateVNPayLink,
 } from "../../../../utils/checkout/checkout.service";
 import Loading from "../../../../components/loading/Loading";
+import sendNotification from "../../../../socket/sendNotification";
+import { useNavigate } from "react-router-dom";
 
 interface OrderInformationProps {}
 const OrderInformation: React.FC<OrderInformationProps> = ({}) => {
+    const navigate = useNavigate();
     const { id } = useSelector((state: any) => state.customerSlice);
     const { items } = useSelector((state: any) => state.cartSlice);
     const [selectedMethod, setSelectedMethod] = useState("creditCard");
@@ -68,13 +72,66 @@ const OrderInformation: React.FC<OrderInformationProps> = ({}) => {
                     payment_method: selectedMethod,
                     lng: window.localStorage.getItem("lng"),
                     lat: window.localStorage.getItem("lat"),
+                    list_items: items.map((item: any) => ({
+                        item_id: item.id,
+                        quantity: item.quantity,
+                    })),
                 };
                 switch (selectedMethod) {
                     case "creditCard":
                         toast("This payment method is not available now");
                         return;
                     case "vnpay":
+                        window.localStorage.setItem(
+                            "order",
+                            JSON.stringify({
+                                order: data,
+                                items: items,
+                            })
+                        );
+                        const orderData = window.localStorage.getItem("order");
+                        const datalocal = orderData
+                            ? JSON.parse(orderData)
+                            : null;
                         try {
+                            const response = await CreateOrder(datalocal.order);
+                            if (response?.status === 409) {
+                                Swal.fire({
+                                    title: "Order failed",
+                                    icon: "error",
+                                    text: "Out of stock, sorry for this inconvenience",
+                                    confirmButtonText: "OK",
+                                    confirmButtonColor: "#f87171",
+                                }).then(async () => {
+                                    await fetch(`${apiUrl}/api/notification`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            title: "Order failed",
+                                            content:
+                                                "Some item is out of stock",
+                                            type: "ingredient",
+                                            link: "/",
+                                        }),
+                                    });
+                                    sendNotification();
+                                    window.localStorage.removeItem(
+                                        "persist:cart"
+                                    );
+                                    window.location.href = "/#/cart";
+                                    window.location.reload();
+                                });
+                            } else {
+                                datalocal?.items.map(async (item: any) => {
+                                    await AddOrderItem({
+                                        order_id: rs?.data.result.data.order_id,
+                                        item_id: item.id,
+                                        quantity: item.quantity,
+                                    });
+                                });
+                            }
                             const config = {
                                 amount:
                                     items.reduce(
@@ -86,15 +143,6 @@ const OrderInformation: React.FC<OrderInformationProps> = ({}) => {
                                 language: "en",
                             };
                             const rs = await CreateVNPayLink(config);
-                            if (rs) {
-                                window.localStorage.setItem(
-                                    "order",
-                                    JSON.stringify({
-                                        order: data,
-                                        items: items,
-                                    })
-                                );
-                            }
                             window.location.href = rs.data.data;
                         } catch (e) {
                             toast("Error when place order");
@@ -104,24 +152,53 @@ const OrderInformation: React.FC<OrderInformationProps> = ({}) => {
                         try {
                             setIsLoading(true);
                             const rs = await CreateOrder(data);
-                            if (rs.status === 201) {
+                            if (rs.status === 409) {
+                                Swal.fire({
+                                    title: "Order failed",
+                                    icon: "error",
+                                    text: "Out of stock, sorry for this inconvenience",
+                                    confirmButtonText: "OK",
+                                    confirmButtonColor: "#f87171",
+                                }).then(async () => {
+                                    await fetch(`${apiUrl}/api/notification`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            title: "Order failed",
+                                            content:
+                                                "Some item is out of stock",
+                                            type: "ingredient",
+                                            link: "/",
+                                        }),
+                                    });
+                                    sendNotification();
+                                    window.localStorage.removeItem(
+                                        "persist:cart"
+                                    );
+                                    window.location.href = "/#/cart";
+                                    window.location.reload();
+                                });
+                            } else if (rs.status === 201) {
                                 items.map(async (item: any) => {
                                     await AddOrderItem({
-                                        order_id: rs?.data.result.order_id,
+                                        order_id: rs?.data.result.data.order_id,
                                         item_id: item.id,
                                         quantity: item.quantity,
                                     });
                                 });
+                                window.localStorage.removeItem("persist:cart");
+                                Swal.fire({
+                                    title: "Order successfully",
+                                    icon: "success",
+                                    confirmButtonText: "OK",
+                                    confirmButtonColor: "#f87171",
+                                }).then(() => {
+                                    window.location.href = "/#/cart";
+                                    window.location.reload();
+                                });
                             }
-                            window.localStorage.removeItem("persist:cart");
-                            Swal.fire({
-                                title: "Order successfully",
-                                icon: "success",
-                                confirmButtonText: "OK",
-                                confirmButtonColor: "#f87171",
-                            }).then(() => {
-                                window.location.href = "/#/cart";                       
-                            });
                         } catch (e) {
                             toast("Error when place order");
                         }

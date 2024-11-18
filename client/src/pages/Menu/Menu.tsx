@@ -43,6 +43,7 @@ const Menu: React.FC = () => {
         }
         fetchData();
     }, [params]);
+    console.log(foodDetail);
     return (
         <main className="flex flex-col items-center">
             <div className="flex flex-col items-center lg:px-0 px-[30px]">
@@ -65,6 +66,8 @@ const Menu: React.FC = () => {
                             price={foodDetail?.price as number}
                             detail={foodDetail?.description as string}
                             image={foodDetail?.image as string}
+                            availability={foodDetail?.availability as boolean}
+
                         />
                         <span className="text-[30px] text-red-500 font-bold mt-5">
                             See more items
