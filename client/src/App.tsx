@@ -19,13 +19,10 @@ const Profile = lazy(() => import("./pages/ProfileDetail/Profile"));
 const Cart = lazy(() => import("./pages/Cart/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout/Checkout"));
 const VnpayReturn = lazy(() => import("./pages/Payment/VnpayReturn"));
-const Demo = lazy(() => import("./pages/Demo/Demo"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const Register = lazy(() => import("./pages/Auth/Register"));
 
 function App() {
-    const hasLogin = sessionStorage.getItem("isGetDemo");
-
     const increaseView = async () => {
         await fetch(`${apiUrl}/api/chart/view`, {
             method: "POST",
@@ -36,42 +33,29 @@ function App() {
     };
 
     useEffect(() => {
-        if (hasLogin === null) {
-            sessionStorage.setItem("demo", "true");
-        }
         increaseView();
     }, []);
+
     return (
         <div className="bg-white w-screen h-full overflow-x-hidden">
             <Suspense fallback={<Loading />}>
                 <Routes>
-                    {sessionStorage.getItem("demo") === "false" && (
-                        <>
-                            <Route path="/auth" element={<Auth />}>
-                                <Route path="login" element={<Login />} />
-                                <Route path="register" element={<Register />} />
-                            </Route>
-                            <Route path="/" element={<Layout />}>
-                                <Route index element={<Main />} />
+                    <Route path="/auth" element={<Auth />}>
+                        <Route path="login" element={<Login />} />
+                        <Route path="register" element={<Register />} />
+                    </Route>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Main />} />
 
-                                <Route path="/about" element={<AboutUs />} />
-                                <Route path="/contact" element={<Contact />} />
-                                <Route path="/menu" element={<Menu />} />
-                                <Route path="/menu?:id" element={<Detail />} />
-                                <Route path="/profile" element={<Profile />} />
-                                <Route path="/cart" element={<Cart />} />
-                                <Route
-                                    path="/checkout"
-                                    element={<Checkout />}
-                                />
-                                <Route
-                                    path="/vnpay_return"
-                                    element={<VnpayReturn />}
-                                />
-                            </Route>
-                        </>
-                    )}
-                    <Route path="/" element={<Demo />} />
+                        <Route path="/about" element={<AboutUs />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/menu" element={<Menu />} />
+                        <Route path="/menu?:id" element={<Detail />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/checkout" element={<Checkout />} />
+                        <Route path="/vnpay_return" element={<VnpayReturn />} />
+                    </Route>
                 </Routes>
             </Suspense>
         </div>
