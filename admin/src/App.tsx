@@ -100,17 +100,12 @@ function App() {
         };
     }, []);
 
-    useEffect(() => {
-        sessionStorage.setItem("demo", "true");
-    }, []);
-
     return (
         <div className="App">
             <Suspense fallback={<Loading />}>
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/test" element={<Test />} />
                     {isLogin && (
                         <>
                             <Route path="/" element={<Layout />}>
