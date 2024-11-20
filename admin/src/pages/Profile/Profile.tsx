@@ -2,7 +2,6 @@
 import SideBar from "../../components/commons/Sidebar";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 //apis
 import {
@@ -14,16 +13,12 @@ import {
 import LoadingScreen from "../../components/commons/LoadingScreen";
 
 export default function Profile() {
-    const navigate = useNavigate();
-    const { id, isLogin } = useSelector((state: any) => state.userSlice);
+    const { id } = useSelector((state: any) => state.userSlice);
     const [isLoading, setIsLoading] = useState(false);
     const [isChangePassword, setIsChangePassword] = useState(false);
     const [isEditProfile, setIsEditProfile] = useState(false);
-
     const [oldPassword, setOldPassword] = useState("");
-
     const [newPassword, setNewPassword] = useState("");
-
     const [confirmPassword, setConfirmPassword] = useState("");
 
     //error
@@ -187,7 +182,6 @@ export default function Profile() {
 
     const fetchUser = async () => {
         const rs = await getStaffByIdAPI(id);
-
         setName(rs?.data?.data?.fullName);
         setEmail(rs?.data?.data?.email);
         setPhone(rs?.data?.data?.phone);

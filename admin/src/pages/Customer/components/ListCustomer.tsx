@@ -76,7 +76,7 @@ export default function ListCustomer() {
 
     return (
         <div className="w-full h-[80%] flex flex-col justify-center items-center px-[100px]">
-            <div className="grid grid-cols-7 grid-rows-1 w-[80%] px-[30px]">
+            <div className="grid grid-cols-7 grid-rows-1 w-full px-[30px]">
                 {title.map((item, index) => {
                     return (
                         <div
@@ -91,13 +91,13 @@ export default function ListCustomer() {
                 })}
             </div>
             {list?.length === 0 ? (
-                <div className="w-[80%] h-full grid-rows-5 bg-white rounded-[30px] flex items-center justify-center p-5">
+                <div className="w-full h-full grid-rows-5 bg-white rounded-[30px] flex items-center justify-center p-5">
                     <span className="text-red-600 text-[25px] font-medium">
                         No item find
                     </span>
                 </div>
             ) : (
-                <div className="w-[80%] h-full grid grid-cols-1 grid-rows-5 bg-white rounded-[30px] items-center justify-center p-[30px]">
+                <div className="w-full h-full grid grid-cols-1 grid-rows-5 bg-white rounded-[30px] items-center justify-center p-[30px]">
                     {list?.map(
                         (
                             item: {

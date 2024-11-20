@@ -55,7 +55,7 @@ const GetIngredientByParamsService = async (params: {
     is_available?: string;
     page?: number;
     limit?: number;
-}): Promise<IIngredient[]> => {
+}) => {
     const { search, is_available, page = 1, limit = 3 } = params;
     const query: any = {};
 
@@ -68,42 +68,21 @@ const GetIngredientByParamsService = async (params: {
     }
 
     try {
-        return await Ingredient.find(query)
+        const result = await Ingredient.find(query)
             .limit(limit)
             .skip((page - 1) * limit);
+        const total = await Ingredient.countDocuments(query);
+
+        return {
+            message: "Get ingredients by params successfully",
+            data: result,
+            total,
+        };
     } catch (error) {
         throw new Error(`Error fetching ingredients by params: ${error}`);
     }
 };
 
-// Đếm số lượng nguyên liệu theo tham số và trả về đối tượng { Sum: number }
-const GetSumIngredientByParamsService = async (params: {
-    search?: string;
-    is_available?: string;
-}): Promise<{ Sum: number }[]> => {
-    const { search, is_available } = params;
-    const query: any = {};
-
-    // Thêm điều kiện tìm kiếm nếu có
-    if (search) {
-        query.$or = [{ name: new RegExp(search, "i") }];
-    }
-
-    // Thêm điều kiện về trạng thái có sẵn nếu có
-    if (is_available !== undefined) {
-        query.is_available = is_available === "true";
-    }
-
-    try {
-        // Đếm số lượng nguyên liệu thỏa mãn điều kiện
-        const count = await Ingredient.countDocuments(query);
-
-        // Trả về mảng đối tượng chứa trường Sum
-        return [{ Sum: count }];
-    } catch (error) {
-        throw new Error(`Error counting ingredients: ${error}`);
-    }
-};
 // Cập nhật nguyên liệu theo ID
 const UpdateIngredientService = async (ingredientData: {
     name: string;
@@ -131,6 +110,5 @@ export {
     DeleteIngredientService,
     GetIngredientByIdService,
     GetIngredientByParamsService,
-    GetSumIngredientByParamsService,
     UpdateIngredientService,
 };

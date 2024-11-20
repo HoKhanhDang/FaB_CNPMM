@@ -29,7 +29,7 @@ const FormAdd: React.FC<FormAddProps> = ({ isOpen, setIsRender,isRender }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-opacity-50 bg-white w-screen h-screen p-[100px] flex justify-center items-baseline">
+        <div className="fixed inset-0 bg-black/20 z-50 w-screen h-screen p-[100px] flex justify-center items-baseline">
             <div className="bg-white w-1/2 h-auto shadow-2xl rounded-md p-[20px] flex  flex-col gap-5 justify-start items-center relative">
                 <span className="text-[30px] font-bold">Add Ingredient</span>
                 <Input

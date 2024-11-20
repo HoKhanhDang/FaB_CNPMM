@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import FilterNotification from "./FilterNotification";
 import SocketSingleton from "../../../socket";
 import { fetchNotifications } from "../../../redux/api/notification";
+import INotification from "../../../types/notification.interface";
 interface MainPanelProps {}
 
 const MainPanel: React.FC<MainPanelProps> = ({}) => {
@@ -13,28 +14,30 @@ const MainPanel: React.FC<MainPanelProps> = ({}) => {
     );
     const socket = SocketSingleton.getInstance();
 
-    const [filter, setFilter] = useState("");
+    const [filter, setFilter] = useState("all");
 
     const filteredList = notifications
-        ?.filter((item: any) => {
+        .filter((item: {
+            isRead:boolean
+        }) => {
+            console.log("item", item);
             return (
-                item.isRead ===
-                (filter === "0" ? 0 : filter === "1" ? 1 : item.isRead)
+                filter === "all" ||
+                (filter === "0" && !item.isRead) ||
+                (filter === "1" && item.isRead)
+                             
             );
         })
-        ?.sort((a: any, b: any) => {
-            if (filter === "newest") {
-                return new Date(b.time).getTime() - new Date(a.time).getTime(); // Newest first
-            } else if (filter === "latest") {
-                return new Date(a.time).getTime() - new Date(b.time).getTime(); // Latest first
+        ?.sort((a: INotification, b: INotification) => {
+            if (a.time && b.time && a.time > b.time) {
+                return 1;
             }
             return 0;
         })
         .reverse();
-
+        
     useEffect(() => {
         socket.on("get-notification", () => {
-            console.log("notification");
             dispatch<any>(fetchNotifications());
         });
         return () => {

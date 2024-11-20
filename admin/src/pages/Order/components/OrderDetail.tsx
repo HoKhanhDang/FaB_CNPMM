@@ -153,7 +153,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({
                 {/* Order Items and Note */}
                 <div className="w-full h-[200px] flex flex-row justify-between items-center gap-5 border py-2">
                     <div className="w-[70%] h-full overflow-y-auto flex flex-col items-center gap-1 px-5">
-                        {data?.orderItems.map((item, index) => (
+                        {data?.orderItems?.map((item, index) => (
                             <div
                                 className="flex flex-row w-full py-1 items-center gap-5"
                                 key={index}

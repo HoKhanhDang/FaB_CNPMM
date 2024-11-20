@@ -146,7 +146,7 @@ export default function ListStaff() {
                                         </p>
                                     </div>
                                     <div className="flex justify-start items-center col-span-1">
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-500 uppercase">
                                             {item.role}
                                         </p>
                                     </div>

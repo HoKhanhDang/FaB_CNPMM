@@ -6,9 +6,9 @@ import { AxiosResponse } from "axios";
 import { loginAPI } from "./auth.service";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/slice/user.slice";
-import swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import path from "../../utils/path";
+import Loading from "../../components/loading/LoadingPage";
 const AuthForm: React.FC = () => {
     const [user, setUser] = useState({
         email: "",
@@ -20,12 +20,14 @@ const AuthForm: React.FC = () => {
         password: "",
         permission: "",
     });
+    const [isLoading, setLoading] = useState(false);
     const [isPasswordVisible, setPasswordVisible] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
+        setLoading(true);
         const rs: AxiosResponse<any> = await loginAPI(
             user.email.trim(),
             user.password.trim()
@@ -35,21 +37,19 @@ const AuthForm: React.FC = () => {
         console.log(rs);
 
         if (rs?.status === 200) {
-            swal.fire({
-                icon: "success",
-                title: "Login success",
-            }).then(() => {
-                dispatch(
-                    login({
-                        token: rs?.data?.data.token,
-                        id: rs?.data?.data.user.user_id,
-                        role: rs?.data?.data.role,
-                        permissions: rs?.data?.data.user.permissions,
-                        fullName: rs?.data?.data.user.fullName,
-                    })
-                );
+            dispatch(
+                login({
+                    token: rs?.data?.data.token,
+                    id: rs?.data?.data.user.user_id,
+                    role: rs?.data?.data.role,
+                    permissions: rs?.data?.data.user.permissions,
+                    fullName: rs?.data?.data.user.fullName,
+                })
+            );
+            setTimeout(() => {
+                setLoading(false);
                 navigate(path.home);
-            });
+            }, 500);
         } else if (status === 400) {
             setError({ ...error, email: "Email is not exist" });
         } else if (status === 401) {
@@ -84,6 +84,7 @@ const AuthForm: React.FC = () => {
     return (
         <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:justify-between h-screen bg-white gap-5 p-5">
             {/* Left Section */}
+            {isLoading && <Loading />}
             <div className="w-full lg:w-1/2 h-full flex flex-col justify-center items-start py-8 lg:py-16 px-8 lg:px-24 rounded-[30px] bg-gray-50">
                 <div className="text-4xl font-extrabold mb-4 flex flex-col">
                     <span>Welcome to</span>

@@ -15,14 +15,6 @@ export const getIngredientByParamsAPI = async (params: any) => {
     });
 };
 
-export const getSumIngredientAPI = async (params: any) => {
-    return await axios({
-        method: "GET",
-        url: "/ingredient/sum",
-        params,
-    });
-};
-
 export const getIngredientByIDAPI = async (id: any) => {
     return await axios({
         method: "GET",

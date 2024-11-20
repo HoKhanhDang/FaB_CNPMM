@@ -6,7 +6,6 @@ import {
     DeleteIngredientService,
     GetIngredientByIdService,
     GetIngredientByParamsService,
-    GetSumIngredientByParamsService,
     UpdateIngredientService,
 } from "./ingredient.service";
 
@@ -21,6 +20,7 @@ const GetIngredient = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 const GetIngredientByParams = async (req: Request, res: Response) => {
     const { search, is_available, page, limit } = req.query;
 
@@ -34,26 +34,13 @@ const GetIngredientByParams = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             message: "Ingredients fetched successfully",
-            result, // result là mảng chứa đối tượng { Sum: total }
+            result, 
         });
     } catch (err) {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-const GetSumIngredientByParams = async (req: Request, res: Response) => {
-    const { search, is_available } = req.query;
-    try {
-        const result = await GetSumIngredientByParamsService({
-            search: search as string,
-            is_available: is_available as string,
-        });
-        return res
-            .status(200)
-            .json({ message: "Ingredients fetched successfully", result });
-    } catch (err) {
-        return res.status(500).json({ message: "Internal server error" });
-    }
-};
+
 const GetIngredientById = async (req: Request, res: Response) => {
     const  i_id  = req.params.i_id;
     if (!i_id) {
@@ -130,5 +117,4 @@ export {
     AddIngredient,
     DeleteIngredient,
     UpdateIngredient,
-    GetSumIngredientByParams,
 };
