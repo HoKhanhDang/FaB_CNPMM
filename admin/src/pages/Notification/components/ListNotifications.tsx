@@ -12,7 +12,9 @@ import { changeIsReadAPI } from "../notification.service";
 interface ListNotificationProps {
     notifications: INotification[];
 }
-const ListNotification: React.FC<ListNotificationProps> = ({notifications}) => {
+const ListNotification: React.FC<ListNotificationProps> = ({
+    notifications,
+}) => {
     const dispatch: any = useDispatch();
 
     const handleIsRead = (nof_id: number) => {
@@ -33,21 +35,19 @@ const ListNotification: React.FC<ListNotificationProps> = ({notifications}) => {
             }
         });
     };
-    
+
     useEffect(() => {
         dispatch(fetchNotifications());
     }, []);
 
     return (
-
-        
         <div className=" overflow-y-auto w-full h-full flex flex-col justify-start items-start">
             {notifications?.map((item: INotification, index: number) => {
                 return (
                     <div
                         key={index}
                         className={`w-full h-auto flex flex-row justify-start items-center gap-5 border-b p-2 hover:bg-blue-200 rounded-md ${
-                            item.isRead === 1 ? "opacity-60" : ""
+                            item.isRead === true ? "opacity-60" : ""
                         }`}
                     >
                         <div
@@ -79,7 +79,9 @@ const ListNotification: React.FC<ListNotificationProps> = ({notifications}) => {
                         </div>
                         <div className="w-[20%] flex flex-col justify-start items-end">
                             <span className="text-[12px]">
-                                {GetTime(item.time as string)}
+                                {item.time
+                                    ? GetTime(item.time.toString())
+                                    : "No time available"}
                             </span>
                         </div>
                         <div className="w-[20%] flex flex-col justify-start items-end">

@@ -20,7 +20,7 @@ const notificationSlice = createSlice({
         setIsRead: (state, action: PayloadAction<number>) => {
             state.notifications = state.notifications.map((notification) => {
                 if (notification.nof_id === action.payload) {
-                    return { ...notification, isRead: 1 };
+                    return { ...notification, isRead: true };
                 }
                 return notification;
             });

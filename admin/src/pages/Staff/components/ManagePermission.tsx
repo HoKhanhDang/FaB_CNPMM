@@ -9,18 +9,27 @@ interface PermissionDescriptorProps {
     permissionsList: string[];
 }
 
-const PermissionDescriptor: React.FC<PermissionDescriptorProps> = ({ _id ,permissionsList}) => {
+const PermissionDescriptor: React.FC<PermissionDescriptorProps> = ({
+    _id,
+    permissionsList,
+}) => {
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
         []
     );
+    console.log("permissionsList", permissionsList);
 
     const handleCheckboxChange = (permission: string) => {
         setSelectedPermissions((prevSelectedPermissions) => {
-            if (prevSelectedPermissions.includes(permission)) {
-                return prevSelectedPermissions.filter((p) => p !== permission);
-            } else {
-                return [...prevSelectedPermissions, permission];
+            if (Array.isArray(prevSelectedPermissions)) {
+                if (prevSelectedPermissions.includes(permission)) {
+                    return prevSelectedPermissions.filter(
+                        (p) => p !== permission
+                    );
+                } else {
+                    return [...prevSelectedPermissions, permission];
+                }
             }
+            return [permission];
         });
     };
 
@@ -43,7 +52,9 @@ const PermissionDescriptor: React.FC<PermissionDescriptorProps> = ({ _id ,permis
         });
     };
     useEffect(() => {
-        setSelectedPermissions(permissionsList || []);
+        if (permissionsList) {
+            setSelectedPermissions(permissionsList);
+        }
     }, [permissionsList]);
 
     return (
@@ -57,7 +68,11 @@ const PermissionDescriptor: React.FC<PermissionDescriptorProps> = ({ _id ,permis
                     <label key={permission} className="flex items-center gap-2">
                         <input
                             type="checkbox"
-                            checked={selectedPermissions ? selectedPermissions?.includes(permission):false}
+                            checked={
+                                selectedPermissions
+                                    ? selectedPermissions?.includes(permission)
+                                    : false
+                            }
                             onChange={() => handleCheckboxChange(permission)}
                         />
                         {permission}

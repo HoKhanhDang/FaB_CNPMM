@@ -188,7 +188,7 @@ const FormAdd: React.FC<FormAddProps> = ({ setIsAdd }) => {
                                 "https://images.ctfassets.net/kugm9fp9ib18/3aHPaEUU9HKYSVj1CTng58/d6750b97344c1dc31bdd09312d74ea5b/menu-default-image_220606_web.png"
                             }
                             alt="Avatar"
-                            className="rounded-[10px] w-[300px] h-[300px] object-cover"
+                            className="rounded-[10px] w-[300px] h-[300px] object-cover border"
                         />
                     )}
                     <span

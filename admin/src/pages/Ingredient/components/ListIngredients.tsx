@@ -87,8 +87,7 @@ const ListIngredients: React.FC<ListIngredientsProps> = ({ isRender }) => {
             limit: 10,
         };
         const rs = await getIngredientByParamsAPI(data);
-        console.log(rs);
-        setList(rs?.data?.result);
+        setList(rs?.data?.result.data);
     };
 
     useEffect(() => {
@@ -168,7 +167,7 @@ const ListIngredients: React.FC<ListIngredientsProps> = ({ isRender }) => {
                                     </div>
 
                                     <div className="flex justify-start items-center col-span-3">
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-500 uppercase">
                                             {item.name}
                                         </p>
                                     </div>

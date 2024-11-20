@@ -6,9 +6,6 @@ export const generateTheme = (
     return `
 //Prompt Content
 Build a React functional component using TypeScript and Tailwind CSS to display a restaurant's story section. The component should be visually appealing and responsive on both mobile and desktop.
-Image Source:
-https://cdn.builder.io/api/v1/image/assets/TEMP/6f9cd253ca538844dd7da6c5fb0294e5183260ba00df1d238cbb9494dc9c2017?placeholderIfAbsent=true&apiKey=e0522cabc7bc4885906fcb2658eca10.
-
 //Layout
 The component should be divided into two sections side-by-side, using a flex-row layout.
 Left Section:

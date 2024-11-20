@@ -4,7 +4,7 @@ import {  useSearchParams } from "react-router-dom";
 import FormAdd from "./components/FormAdd";
 import PagingBar from "../../components/commons/PagingBar";
 //api
-import { getSumIngredientAPI } from "./ingredient.service";
+import { getIngredientByParamsAPI } from "./ingredient.service";
 import ListIngredients from "./components/ListIngredients";
 import FilterBar from "./components/FilterBar";
 
@@ -21,8 +21,9 @@ export default function Ingredient() {
             is_available: params.get("status"),
             search: params.get("title"),
         };
-        const rs = await getSumIngredientAPI(data);
-        setTotalPage(Math.ceil(rs?.data?.result[0] / limit));
+        const rs = await getIngredientByParamsAPI(data);
+        console.log(rs);    
+        setTotalPage(Math.ceil(rs?.data?.result.total / limit));
     };
     
 

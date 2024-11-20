@@ -13,8 +13,6 @@ const FilterNotification: React.FC<FilterNotificationProps> = ({
             <option value="all">All</option>
             <option value="0">Unread</option>
             <option value="1">Read</option>
-            <option value="newest">Newest</option>
-            <option value="latest">Latest</option>
         </select>
     )
 }

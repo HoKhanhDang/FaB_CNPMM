@@ -17,9 +17,10 @@ export const getStaffByIdAPI = async (id: any) => {
 };
 
 export const editUserAPI = async (data: any) => {
+    console.log(data);
     return await axios({
         method: "PUT",
-        url: `/user/admin/${data.id}`,
+        url: `/user/admin/${data.user_id}`,
         data,
     });
 };

@@ -30,12 +30,12 @@ const DetailOrder = ({
                 onClick={(event) => {
                     event?.stopPropagation();
                 }}
-                className="w-[25%] h-[80%] bg-white rounded-md flex flex-col justify-start items-center"
+                className="w-[25%] h-[80%] bg-white rounded-md flex flex-col justify-start items-center p-[20px] gap-5"
             >
                 <span className="text-[25px] font-bold pt-2">
-                    Order {order_id}
+                    Order {order_id.slice(0, 5)}...
                 </span>
-                <div className="w-full h-[30%] flex flex-col justify-start items-start gap-2 pt-[20px] px-[20px]">
+                <div className="w-full h-[30%] flex flex-col justify-start items-start gap-2 ">
                     <text
                         name="message"
                         id=""
@@ -45,7 +45,7 @@ const DetailOrder = ({
                         {message}
                     </text>
                 </div>
-                <div className="w-full h-full overflow-y-auto flex flex-col justify-start items-center gap-1 p-[20px]">
+                <div className="w-full h-full overflow-y-auto flex flex-col justify-start items-center gap-1 ">
                     {data?.map((item, index) => {
                         return (
                             <div className="flex flex-row w-full h-auto py-1 items-center justify-start gap-5 transition transform hover:scale-105 border-b">

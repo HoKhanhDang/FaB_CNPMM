@@ -23,17 +23,17 @@ const MainPanel: React.FC<MainPanelProps> = ({}) => {
     const refreshData = () => {
         queryClient.invalidateQueries({ queryKey: ["fetchOrders"] });
     };
-
     return (
         <div className="w-full h-full rounded-[20px] bg-sidebar grid grid-cols-5 grid-rows-2 gap-5 p-5">
             {data?.length ? (
                 data?.map((order: any) => {
+                    console.log(order);
                     return (
                         <OrderCard
                             fetchAllOrder={refreshData}
                             message={order.message}
                             orderId={order.order_id}
-                            delivery_time={order.delivery_time}
+                            delivery_time={order.create_at}
                         />
                     );
                 })
